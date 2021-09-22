@@ -9,7 +9,6 @@ import (
 	"fyne.io/fyne/v2/container"
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
-	"gonum.org/v1/plot/vg"
 	"log"
 )
 
@@ -28,7 +27,7 @@ func main() {
 		negValuer[i].Label = fmt.Sprintf("%4.4f", negValuer[i].Value)
 	}
 
-	negBox, err := plotter.NewBoxPlot(vg.Points(256), 0, negValuer)
+	negBox, err := plotter.NewHist(negValuer, 256)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -45,7 +44,7 @@ func main() {
 		highValuer[i].Label = fmt.Sprintf("%4.4f", highValuer[i].Value)
 	}
 
-	highBox, err := plotter.NewBoxPlot(vg.Points(256), 0, highValuer)
+	highBox, err := plotter.NewHist(highValuer, 256)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -62,26 +61,26 @@ func main() {
 		sobelValuer[i].Label = fmt.Sprintf("%4.4f", sobelValuer[i].Value)
 	}
 
-	sobelBox, err := plotter.NewBoxPlot(vg.Points(256), 0, sobelValuer)
+	sobelBox, err := plotter.NewHist(sobelValuer, 256)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	neg, err := plot.New()
+	neg := plot.New()
 	neg.Add(negBox)
 	err = neg.Save(200, 200, ResourcesFolder+"/neg_hist.png")
 	if err != nil {
 		log.Panic(err)
 	}
 
-	highPlot, err := plot.New()
+	highPlot := plot.New()
 	highPlot.Add(highBox)
 	err = highPlot.Save(200, 200, ResourcesFolder+"/high_hist.png")
 	if err != nil {
 		log.Panic(err)
 	}
 
-	sobelPlot, err := plot.New()
+	sobelPlot := plot.New()
 	sobelPlot.Add(sobelBox)
 	err = sobelPlot.Save(200, 200, ResourcesFolder+"/sobel_hist.png")
 	if err != nil {
@@ -102,9 +101,23 @@ func main() {
 		Height: 200,
 	})
 
+	highCanvas := canvas.NewImageFromFile(ResourcesFolder + "/high_hist.png")
+	highCanvas.FillMode = canvas.ImageFillStretch
+	highCanvas.SetMinSize(fyne.Size{
+		Width:  200,
+		Height: 200,
+	})
+
 	negative := canvas.NewImageFromFile(ResourcesFolder + "/negative.jpg")
 	negative.FillMode = canvas.ImageFillStretch
 	negative.SetMinSize(fyne.Size{
+		Width:  200,
+		Height: 200,
+	})
+
+	negCanvas := canvas.NewImageFromFile(ResourcesFolder + "/neg_hist.png")
+	negCanvas.FillMode = canvas.ImageFillStretch
+	negCanvas.SetMinSize(fyne.Size{
 		Width:  200,
 		Height: 200,
 	})
@@ -116,6 +129,13 @@ func main() {
 		Height: 200,
 	})
 
+	sobelCanvas := canvas.NewImageFromFile(ResourcesFolder + "/sobel_hist.png")
+	sobelCanvas.FillMode = canvas.ImageFillStretch
+	sobelCanvas.SetMinSize(fyne.Size{
+		Width:  200,
+		Height: 200,
+	})
+
 	a := app.New()
 	w := a.NewWindow("Image filtering")
 	w.SetContent(container.NewVBox(
@@ -123,12 +143,15 @@ func main() {
 		container.NewAppTabs(
 			container.NewTabItem("High filter", container.NewVBox(
 				high,
+				highCanvas,
 			)),
 			container.NewTabItem("Negative filter", container.NewVBox(
 				negative,
+				negCanvas,
 			)),
 			container.NewTabItem("Sobel filter", container.NewVBox(
 				sobel,
+				sobelCanvas,
 			)),
 		),
 	))
