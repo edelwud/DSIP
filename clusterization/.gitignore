@@ -16,5 +16,7 @@
 *.out
 
 # Resources
-resources/*
-!resources/tests/image.jpg
+resources/easy_output/*
+!resources/easy_output/.gitkeep
+resources/hard_output/*
+!resources/hard_output/.gitkeep
