@@ -27,8 +27,10 @@ func (o Otsu) CalculateHistogram() []uint8 {
 // CalculateAverageIntensity calculates average intensity for stored image
 func (o Otsu) CalculateAverageIntensity(histogram []uint8) float64 {
 	sum := 0
-	for i, value := range histogram {
-		sum += i * int(value)
+	for y := o.Image.Bounds().Min.Y; y < o.Image.Bounds().Max.Y; y++ {
+		for x := o.Image.Bounds().Min.X; x < o.Image.Bounds().Max.X; x++ {
+			sum += int(o.Image.GrayAt(x, y).Y)
+		}
 	}
 	return float64(sum) / float64(len(histogram))
 }
@@ -51,16 +53,11 @@ func (o Otsu) CalculateThreshold() int {
 	histogram := o.CalculateHistogram()
 	probability := o.CalculateProbability(histogram)
 
-	q1 := probability[0]
+	q1, q1next := probability[0], 0.0
 
-	mu1 := 0.0
-	mu1next := 0.0
-	mu2 := 0.0
-	mu2next := 0.0
+	mu1, mu1next := 0.0, 0.0
+	mu2, mu2next := 0.0, 0.0
 	mu := o.CalculateAverageIntensity(histogram)
-
-	q1prev := q1
-	q1next := 0.0
 
 	betweenVariance := 0.0
 	maxBetweenVariance := 0.0
@@ -68,17 +65,17 @@ func (o Otsu) CalculateThreshold() int {
 	threshold := 0
 
 	for i := 1; i < 255; i++ {
-		q1next = q1prev + probability[i+1]
-		mu1next = (q1prev*mu1 + float64(i+1)*(probability[i+1])) / q1next
+		q1next = q1 + probability[i+1]
+		mu1next = (q1*mu1 + float64(i+1)*(probability[i+1])) / q1next
 		mu2next = (mu - q1next*mu1next) / (1 - q1next)
-		betweenVariance = q1prev * (1 - q1prev) * ((mu1 - mu2) * (mu1 - mu2))
+		betweenVariance = q1 * (1 - q1) * ((mu1 - mu2) * (mu1 - mu2))
 
 		if betweenVariance > maxBetweenVariance {
 			maxBetweenVariance = betweenVariance
 			threshold = i
 		}
 
-		q1prev = q1next
+		q1 = q1next
 		mu1 = mu1next
 		mu2 = mu2next
 
