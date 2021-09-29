@@ -7,18 +7,14 @@ const (
 	ImageStorePath = "./resources/tests/image_store.jpg"
 )
 
-func TestJpegImageReading(t *testing.T) {
-	image, err := ReadImageJpeg(ImagePath)
+func TestReadImageJpeg(t *testing.T) {
+	_, err := ReadImageJpeg(ImagePath)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	if image != nil {
-		t.Log("Image opened successfully")
-	}
 }
 
-func TestJpegImageWriting(t *testing.T) {
+func TestWriteImageJpeg(t *testing.T) {
 	img, err := ReadImageJpeg(ImagePath)
 	if err != nil {
 		t.Fatal(err)
