@@ -4,5 +4,5 @@ import "image"
 
 // Binarization declares basic interface for binarization algorithms
 type Binarization interface {
-	Process() (image.Image, error)
+	Process() (*image.Gray, error)
 }
