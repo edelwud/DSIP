@@ -11,11 +11,7 @@ type BradleyRoth struct {
 	T     float64
 }
 
-// Process Bradley-Roth binarization
-func (br BradleyRoth) Process() (*image.Gray, error) {
-	rect := br.Image.Bounds()
-	width, height := rect.Size().X, rect.Size().Y
-
+func (br BradleyRoth) CreateIntegralImage() *image.Gray {
 	integralImg := image.NewGray(br.Image.Bounds())
 
 	for y := br.Image.Bounds().Min.Y; y < br.Image.Bounds().Max.Y; y++ {
@@ -31,8 +27,16 @@ func (br BradleyRoth) Process() (*image.Gray, error) {
 		}
 	}
 
+	return integralImg
+}
+
+// Process Bradley-Roth binarization
+func (br BradleyRoth) Process() *image.Gray {
+	integralImg := br.CreateIntegralImage()
 	resultImg := image.NewGray(integralImg.Bounds())
 
+	rect := br.Image.Bounds()
+	width, height := rect.Size().X, rect.Size().Y
 	s := width / 8
 	s2 := s / 2
 
@@ -74,7 +78,7 @@ func (br BradleyRoth) Process() (*image.Gray, error) {
 		}
 	}
 
-	return resultImg, nil
+	return resultImg
 }
 
 // CreateBradleyRothBinarization creates BradleyRoth exemplar

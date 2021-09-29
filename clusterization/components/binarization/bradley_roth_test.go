@@ -18,11 +18,7 @@ func TestBradleyRoth_Process(t *testing.T) {
 
 	grayImage := utils.GrayscaleImage(image)
 	binarization := CreateBradleyRothBinarization(grayImage, 0.15)
-	processedImage, err := binarization.Process()
-	if err != nil {
-		t.Fatal(err)
-	}
-
+	processedImage := binarization.Process()
 	err = utils.WriteImageJpeg(processedImage, ImageStorePath)
 	if err != nil {
 		t.Fatal(err)
