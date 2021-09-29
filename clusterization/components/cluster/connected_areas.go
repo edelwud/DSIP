@@ -44,67 +44,24 @@ func (a ConnectedAreas) WalkThroughArea() []image.Point {
 
 	x, y := point.X, point.Y
 
+loop:
 	for {
-		tl := a.Image.GrayAt(x, y).Y
-		tr := a.Image.GrayAt(x+1, y).Y
-		trr := a.Image.GrayAt(x+2, y).Y
-		br := a.Image.GrayAt(x+1, y+1).Y
-		brr := a.Image.GrayAt(x+2, y+1).Y
-		bbr := a.Image.GrayAt(x+1, y+2).Y
-		bbrr := a.Image.GrayAt(x+2, y+2).Y
-		bl := a.Image.GrayAt(x, y+1).Y
-		bbl := a.Image.GrayAt(x, y+2).Y
-
-		if tl == 255 {
-			a.Image.Set(x, y, color.Gray{Y: 0})
-			route = append(route, image.Point{
-				X: x,
-				Y: y,
-			})
-		}
-
-		if tr == 255 {
-			x++
-			continue
-		}
-
-		if br == 255 {
-			x++
-			y++
-			continue
-		}
-
-		if bl == 255 {
-			y++
-			continue
-		}
-
-		if trr == 255 {
-			x += 2
-			continue
-		}
-
-		if brr == 255 {
-			x += 2
-			y += 1
-			continue
-		}
-
-		if bbrr == 255 {
-			x += 2
-			y += 2
-			continue
-		}
-
-		if bbr == 255 {
-			x += 1
-			y += 2
-			continue
-		}
-
-		if bbl == 255 {
-			y += 2
-			continue
+		for k := 1; k < 3; k++ {
+			for i := -k; i < k+1; i++ {
+				for j := -k; j < k+1; j++ {
+					intensity := a.Image.GrayAt(x+j, y+i).Y
+					if intensity == 255 {
+						x += j
+						y += i
+						a.Image.Set(x, y, color.Gray{Y: 0})
+						route = append(route, image.Point{
+							X: x,
+							Y: y,
+						})
+						continue loop
+					}
+				}
+			}
 		}
 
 		break
