@@ -2,7 +2,6 @@ package binarization
 
 import (
 	"clusterization/components/utils"
-	"os"
 	"testing"
 )
 
@@ -12,8 +11,6 @@ const (
 )
 
 func TestOtsu_Process(t *testing.T) {
-	t.Log(os.Getwd())
-
 	image, err := utils.ReadImageJpeg(ImageOtsuPath)
 	if err != nil {
 		t.Fatal(err)
