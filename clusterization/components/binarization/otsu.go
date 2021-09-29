@@ -95,7 +95,7 @@ func (o Otsu) Process() *image.Gray {
 	for y := o.Image.Bounds().Min.Y; y < o.Image.Bounds().Max.Y; y++ {
 		for x := o.Image.Bounds().Min.X; x < o.Image.Bounds().Max.X; x++ {
 			intensity := o.Image.GrayAt(x, y).Y
-			if intensity < uint8(threshold) {
+			if intensity < uint8(threshold-10) {
 				resultImage.Set(x, y, color.Gray{Y: 0})
 			} else {
 				resultImage.Set(x, y, color.Gray{Y: 255})
