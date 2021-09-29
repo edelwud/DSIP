@@ -2,13 +2,19 @@ package binarization
 
 import (
 	"clusterization/components/utils"
+	"os"
 	"testing"
 )
 
-const OtsuImageStorePath = "./resources/tests/image_otsu.jpg"
+const (
+	ImageOtsuPath      = "./../../resources/easy/P0001460.jpg"
+	ImageOtsuStorePath = "./../../resources/easy_output/image_otsu.jpg"
+)
 
 func TestOtsu_Process(t *testing.T) {
-	image, err := utils.ReadImageJpeg(ImagePath)
+	t.Log(os.Getwd())
+
+	image, err := utils.ReadImageJpeg(ImageOtsuPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -16,7 +22,8 @@ func TestOtsu_Process(t *testing.T) {
 	grayImage := utils.GrayscaleImage(image)
 	binarization := CreateOtsuBinarization(grayImage)
 	processedImage := binarization.Process()
-	err = utils.WriteImageJpeg(processedImage, OtsuImageStorePath)
+
+	err = utils.WriteImageJpeg(processedImage, ImageOtsuStorePath)
 	if err != nil {
 		t.Fatal(err)
 	}

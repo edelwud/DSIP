@@ -6,12 +6,12 @@ import (
 )
 
 const (
-	ImagePath      = "./resources/tests/image.jpg"
-	ImageStorePath = "./resources/tests/image_bradley_roth.jpg"
+	ImageBradleyRothPath      = "./../../resources/easy/P0001460.jpg"
+	ImageBradleyRothStorePath = "./../../resources/easy_output/image_bradley_roth.jpg"
 )
 
 func TestBradleyRoth_Process(t *testing.T) {
-	image, err := utils.ReadImageJpeg(ImagePath)
+	image, err := utils.ReadImageJpeg(ImageBradleyRothPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -19,7 +19,8 @@ func TestBradleyRoth_Process(t *testing.T) {
 	grayImage := utils.GrayscaleImage(image)
 	binarization := CreateBradleyRothBinarization(grayImage, 0.15)
 	processedImage := binarization.Process()
-	err = utils.WriteImageJpeg(processedImage, ImageStorePath)
+
+	err = utils.WriteImageJpeg(processedImage, ImageBradleyRothStorePath)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -3,24 +3,24 @@ package utils
 import "testing"
 
 const (
-	ImagePath      = "./resources/tests/image.jpg"
-	ImageStorePath = "./resources/tests/image_store.jpg"
+	ImageOpenPath      = "./../../resources/easy/P0001460.jpg"
+	ImageOpenStorePath = "./../../resources/easy_output/image_store.jpg"
 )
 
 func TestReadImageJpeg(t *testing.T) {
-	_, err := ReadImageJpeg(ImagePath)
+	_, err := ReadImageJpeg(ImageOpenPath)
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestWriteImageJpeg(t *testing.T) {
-	img, err := ReadImageJpeg(ImagePath)
+	img, err := ReadImageJpeg(ImageOpenPath)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = WriteImageJpeg(img, ImageStorePath)
+	err = WriteImageJpeg(img, ImageOpenStorePath)
 	if err != nil {
 		t.Fatal(err)
 	}

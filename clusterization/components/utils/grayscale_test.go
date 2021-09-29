@@ -2,17 +2,20 @@ package utils
 
 import "testing"
 
-const GrayscaleImagePath = "./resources/tests/image_grayscale.jpg"
+const (
+	ImageGrayscalePath      = "./../../resources/easy/P0001460.jpg"
+	ImageGrayscaleStorePath = "./../../resources/easy_output/image_grayscale.jpg"
+)
 
 func TestGrayscaleImage(t *testing.T) {
-	img, err := ReadImageJpeg("./resources/tests/image2.jpg")
+	img, err := ReadImageJpeg(ImageGrayscalePath)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	grayImage := GrayscaleImage(img)
 
-	err = WriteImageJpeg(grayImage, GrayscaleImagePath)
+	err = WriteImageJpeg(grayImage, ImageGrayscaleStorePath)
 	if err != nil {
 		t.Fatal(err)
 	}
