@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	ImageConnectedAreas      = "./../../resources/hard/P0001465.jpg"
+	ImageConnectedAreas      = "./../../resources/easy/P0001468.jpg"
 	ImageConnectedAreasStore = "./../../resources/easy_output/image_connected_areas.jpg"
 )
 
@@ -21,7 +21,7 @@ func TestConnectedAreas_FindConnectedAreas(t *testing.T) {
 	grayImage := utils.GrayscaleImage(image)
 	bin := binarization.CreateOtsuBinarization(grayImage)
 
-	connectedAreas := CreateConnectedAreasAnalyzer(bin.Process())
+	connectedAreas := CreateConnectedAreasAnalyzer(bin.Process(), 30)
 	connectedAreas.FindConnectedAreas()
 
 	err = utils.WriteImageJpeg(connectedAreas.Image, ImageConnectedAreasStore)

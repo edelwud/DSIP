@@ -12,6 +12,7 @@ import (
 type ConnectedAreas struct {
 	Image   *image.Gray
 	Figures []figure.Figure
+	Scale   int
 }
 
 // FindConnectedAreas processes image scanning to find connected areas
@@ -54,7 +55,7 @@ func (a ConnectedAreas) WalkThroughArea() []image.Point {
 
 	x, y := point.X, point.Y
 
-	mask := a.GenerateMask(30)
+	mask := a.GenerateMask(a.Scale)
 	colour := utils.GenerateRandomColour()
 
 loop:
@@ -205,6 +206,10 @@ func (a ConnectedAreas) HasArea() bool {
 }
 
 // CreateConnectedAreasAnalyzer creates ConnectedAreas exemplar
-func CreateConnectedAreasAnalyzer(img *image.Gray) ConnectedAreas {
-	return ConnectedAreas{Image: img, Figures: make([]figure.Figure, 0)}
+func CreateConnectedAreasAnalyzer(img *image.Gray, scale int) ConnectedAreas {
+	return ConnectedAreas{
+		Image:   img,
+		Scale:   scale,
+		Figures: make([]figure.Figure, 0),
+	}
 }
