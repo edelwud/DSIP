@@ -2,21 +2,21 @@ package cluster
 
 import (
 	"clusterization/components/figure"
+	"fmt"
 	"image"
 	"image/color"
 )
 
 type ConnectedAreas struct {
 	Image *image.Gray
+	Area  *image.Gray
 }
 
-func (a ConnectedAreas) FindConnectedAreas() []figure.Figure {
+func (a *ConnectedAreas) FindConnectedAreas() []figure.Figure {
 	figures := make([]figure.Figure, 0)
-	//for a.HasArea() {
 	route := a.WalkThroughArea()
 	a.ClearRoute(route)
-	//}
-
+	a.Area = a.DrawRoute(route)
 	return figures
 }
 
@@ -44,41 +44,93 @@ func (a ConnectedAreas) WalkThroughArea() []image.Point {
 
 	x, y := point.X, point.Y
 
+	mask := a.GenerateMask(20)
+
 loop:
 	for {
-		for k := 1; k < 3; k++ {
-			for i := -k; i < k+1; i++ {
-				for j := -k; j < k+1; j++ {
-					intensity := a.Image.GrayAt(x+j, y+i).Y
-					if intensity == 255 {
-						x += j
-						y += i
-						a.Image.Set(x, y, color.Gray{Y: 0})
-						route = append(route, image.Point{
-							X: x,
-							Y: y,
-						})
-						continue loop
-					}
-				}
+		for _, diff := range mask {
+			intensity := a.Image.GrayAt(x+diff.X, y+diff.Y).Y
+			if intensity == 255 {
+				x += diff.X
+				y += diff.Y
+				a.Image.Set(x, y, color.Gray{Y: 0})
+				route = append(route, image.Point{
+					X: x,
+					Y: y,
+				})
+				continue loop
 			}
 		}
-
 		break
 	}
 
 	return route
 }
 
-func (a ConnectedAreas) GenerateMask(x int, y int) [][]int {
-	result := make([][]int, 0)
+func (a ConnectedAreas) GenerateMask(scale int) []image.Point {
+	result := make([]image.Point, 0)
 
-	for i := 0; i < y; i++ {
-		for j := 0; j < x; j++ {
-			result[i] = append(result[i], j)
+	result = append(result, image.Point{X: 0, Y: 0})
+
+	x := 0
+	y := 0
+
+	width := 1
+	height := 1
+	pawn := true
+
+	for width <= scale {
+		xFlag := false
+		yFlag := true
+		flag := -width - (width - 1)
+		x++
+
+		result = append(result, image.Point{X: x, Y: 1 - width})
+
+		for x != width || y != -height {
+			if flag > 0 {
+				if x == width {
+					xFlag = false
+				}
+				if x == -width {
+					xFlag = true
+				}
+				if xFlag {
+					x++
+				} else {
+					x--
+				}
+				pawn = true
+				flag--
+			} else {
+				if y == height {
+					yFlag = false
+				}
+				if y == -height {
+					yFlag = true
+				}
+				if yFlag {
+					y++
+				} else {
+					y--
+				}
+				pawn = false
+				flag++
+			}
+			result = append(result, image.Point{X: x, Y: y})
+			if flag == 0 {
+				if pawn {
+					flag = -2 * width
+				} else {
+					flag = +2 * width
+				}
+			}
 		}
-		result = append(result, []int{})
+		width++
+		height++
 	}
+
+	fmt.Println(result)
 
 	return result
 }
@@ -88,6 +140,44 @@ func (a ConnectedAreas) ClearRoute(route []image.Point) {
 		x, y := point.X, point.Y
 		a.Image.Set(x, y, color.Gray{Y: 0})
 	}
+}
+
+func (a ConnectedAreas) DrawRoute(route []image.Point) *image.Gray {
+	maxX := 0
+	maxY := 0
+	minX := 0
+	minY := 0
+	for _, point := range route {
+		x, y := point.X, point.Y
+		if x > maxX {
+			maxX = x
+		}
+		if y > maxY {
+			maxY = y
+		}
+		if x < minX {
+			minX = x
+		}
+		if y < minY {
+			minY = y
+		}
+	}
+
+	for i, point := range route {
+		route[i] = image.Point{
+			X: point.X - minX,
+			Y: point.Y - minY,
+		}
+	}
+
+	img := image.NewGray(image.Rect(0, 0, maxX-minX, maxY-minY))
+
+	for _, point := range route {
+		x, y := point.X, point.Y
+		img.Set(x, y, color.Gray{Y: 255})
+	}
+
+	return img
 }
 
 func (a ConnectedAreas) HasArea() bool {

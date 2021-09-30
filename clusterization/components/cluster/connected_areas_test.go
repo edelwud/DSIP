@@ -23,7 +23,7 @@ func TestConnectedAreas_FindConnectedAreas(t *testing.T) {
 	connectedAreas := CreateConnectedAreasAnalyzer(binarization.Process())
 	connectedAreas.FindConnectedAreas()
 
-	err = utils.WriteImageJpeg(connectedAreas.Image, ImageConnectedAreasStore)
+	err = utils.WriteImageJpeg(connectedAreas.Area, ImageConnectedAreasStore)
 	if err != nil {
 		t.Fatal(err)
 	}
