@@ -86,9 +86,9 @@ func (a ConnectedAreas) GenerateMask(scale int) []image.Point {
 	x := 0
 	y := 0
 
+	var pawn bool
 	width := 1
 	height := 1
-	pawn := true
 
 	for width <= scale {
 		xFlag := false
