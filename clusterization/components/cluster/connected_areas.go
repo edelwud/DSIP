@@ -8,11 +8,13 @@ import (
 	"math"
 )
 
+// ConnectedAreas finds connected areas in binarized images
 type ConnectedAreas struct {
 	Image   *image.Gray
 	Figures []figure.Figure
 }
 
+// FindConnectedAreas processes image scanning to find connected areas
 func (a *ConnectedAreas) FindConnectedAreas() []figure.Figure {
 	for a.HasArea() {
 		route := a.WalkThroughArea()
@@ -26,6 +28,7 @@ func (a *ConnectedAreas) FindConnectedAreas() []figure.Figure {
 	return a.Figures
 }
 
+// GetStartPoint returns start point for WalkThroughArea
 func (a ConnectedAreas) GetStartPoint() *image.Point {
 	for y := a.Image.Bounds().Min.Y; y < a.Image.Bounds().Max.Y; y++ {
 		for x := a.Image.Bounds().Min.X; x < a.Image.Bounds().Max.X; x++ {
@@ -40,6 +43,7 @@ func (a ConnectedAreas) GetStartPoint() *image.Point {
 	return nil
 }
 
+// WalkThroughArea walks through connected area, returns path
 func (a ConnectedAreas) WalkThroughArea() []image.Point {
 	route := make([]image.Point, 0)
 
@@ -74,6 +78,7 @@ loop:
 	return route
 }
 
+// GenerateMask generates mask for area analysis
 func (a ConnectedAreas) GenerateMask(scale int) []image.Point {
 	result := make([]image.Point, 0)
 	result = append(result, image.Point{X: 0, Y: 0})
@@ -139,6 +144,7 @@ func (a ConnectedAreas) GenerateMask(scale int) []image.Point {
 	return result
 }
 
+// ClearRoute clears route in parent image
 func (a ConnectedAreas) ClearRoute(route []image.Point) {
 	for _, point := range route {
 		x, y := point.X, point.Y
@@ -146,6 +152,7 @@ func (a ConnectedAreas) ClearRoute(route []image.Point) {
 	}
 }
 
+// DrawRoute draws new image from route
 func (a ConnectedAreas) DrawRoute(route []image.Point) *image.Gray {
 	maxX := 0
 	maxY := 0
@@ -184,6 +191,7 @@ func (a ConnectedAreas) DrawRoute(route []image.Point) *image.Gray {
 	return img
 }
 
+// HasArea looks for white areas in parent image
 func (a ConnectedAreas) HasArea() bool {
 	for y := a.Image.Bounds().Min.Y; y < a.Image.Bounds().Max.Y; y++ {
 		for x := a.Image.Bounds().Min.X; x < a.Image.Bounds().Max.X; x++ {
@@ -196,6 +204,7 @@ func (a ConnectedAreas) HasArea() bool {
 	return false
 }
 
+// CreateConnectedAreasAnalyzer creates ConnectedAreas exemplar
 func CreateConnectedAreasAnalyzer(img *image.Gray) ConnectedAreas {
 	return ConnectedAreas{Image: img, Figures: make([]figure.Figure, 0)}
 }
