@@ -3,6 +3,7 @@ package cluster
 import (
 	binarization2 "clusterization/components/binarization"
 	"clusterization/components/utils"
+	"strconv"
 	"testing"
 )
 
@@ -23,8 +24,12 @@ func TestConnectedAreas_FindConnectedAreas(t *testing.T) {
 	connectedAreas := CreateConnectedAreasAnalyzer(binarization.Process())
 	connectedAreas.FindConnectedAreas()
 
-	err = utils.WriteImageJpeg(connectedAreas.Area, ImageConnectedAreasStore)
-	if err != nil {
-		t.Fatal(err)
+	err = utils.WriteImageJpeg(connectedAreas.Image, ImageConnectedAreasStore)
+
+	for i, area := range connectedAreas.Areas {
+		err = utils.WriteImageJpeg(area, "./../../resources/easy_output/image_connected_areas_"+strconv.Itoa(i)+".jpg")
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
 }

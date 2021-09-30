@@ -5,18 +5,23 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"math"
 )
 
 type ConnectedAreas struct {
 	Image *image.Gray
-	Area  *image.Gray
+	Areas []*image.Gray
 }
 
 func (a *ConnectedAreas) FindConnectedAreas() []figure.Figure {
 	figures := make([]figure.Figure, 0)
-	route := a.WalkThroughArea()
-	a.ClearRoute(route)
-	a.Area = a.DrawRoute(route)
+
+	for a.HasArea() {
+		route := a.WalkThroughArea()
+		a.ClearRoute(route)
+		a.Areas = append(a.Areas, a.DrawRoute(route))
+	}
+
 	return figures
 }
 
@@ -44,7 +49,7 @@ func (a ConnectedAreas) WalkThroughArea() []image.Point {
 
 	x, y := point.X, point.Y
 
-	mask := a.GenerateMask(20)
+	mask := a.GenerateMask(30)
 
 loop:
 	for {
@@ -130,8 +135,6 @@ func (a ConnectedAreas) GenerateMask(scale int) []image.Point {
 		height++
 	}
 
-	fmt.Println(result)
-
 	return result
 }
 
@@ -145,8 +148,8 @@ func (a ConnectedAreas) ClearRoute(route []image.Point) {
 func (a ConnectedAreas) DrawRoute(route []image.Point) *image.Gray {
 	maxX := 0
 	maxY := 0
-	minX := 0
-	minY := 0
+	minX := math.Inf(1)
+	minY := math.Inf(1)
 	for _, point := range route {
 		x, y := point.X, point.Y
 		if x > maxX {
@@ -155,22 +158,23 @@ func (a ConnectedAreas) DrawRoute(route []image.Point) *image.Gray {
 		if y > maxY {
 			maxY = y
 		}
-		if x < minX {
-			minX = x
+		if float64(x) < minX {
+			minX = float64(x)
+			fmt.Println(x)
 		}
-		if y < minY {
-			minY = y
+		if float64(y) < minY {
+			minY = float64(y)
 		}
 	}
 
 	for i, point := range route {
 		route[i] = image.Point{
-			X: point.X - minX,
-			Y: point.Y - minY,
+			X: point.X - int(minX),
+			Y: point.Y - int(minY),
 		}
 	}
 
-	img := image.NewGray(image.Rect(0, 0, maxX-minX, maxY-minY))
+	img := image.NewGray(image.Rect(0, 0, maxX-int(minX), maxY-int(minY)))
 
 	for _, point := range route {
 		x, y := point.X, point.Y
@@ -193,5 +197,5 @@ func (a ConnectedAreas) HasArea() bool {
 }
 
 func CreateConnectedAreasAnalyzer(img *image.Gray) ConnectedAreas {
-	return ConnectedAreas{Image: img}
+	return ConnectedAreas{Image: img, Areas: make([]*image.Gray, 0)}
 }
