@@ -2,27 +2,28 @@ package cluster
 
 import (
 	"clusterization/components/figure"
-	"fmt"
+	"clusterization/components/utils"
 	"image"
 	"image/color"
 	"math"
 )
 
 type ConnectedAreas struct {
-	Image *image.Gray
-	Areas []*image.Gray
+	Image   *image.Gray
+	Figures []figure.Figure
 }
 
 func (a *ConnectedAreas) FindConnectedAreas() []figure.Figure {
-	figures := make([]figure.Figure, 0)
-
 	for a.HasArea() {
 		route := a.WalkThroughArea()
-		a.ClearRoute(route)
-		a.Areas = append(a.Areas, a.DrawRoute(route))
+		img := a.DrawRoute(route)
+		a.Figures = append(a.Figures, figure.Figure{
+			Snapshot: img,
+			Route:    route,
+		})
 	}
 
-	return figures
+	return a.Figures
 }
 
 func (a ConnectedAreas) GetStartPoint() *image.Point {
@@ -50,6 +51,7 @@ func (a ConnectedAreas) WalkThroughArea() []image.Point {
 	x, y := point.X, point.Y
 
 	mask := a.GenerateMask(30)
+	colour := utils.GenerateRandomColour()
 
 loop:
 	for {
@@ -58,7 +60,7 @@ loop:
 			if intensity == 255 {
 				x += diff.X
 				y += diff.Y
-				a.Image.Set(x, y, color.Gray{Y: 0})
+				a.Image.Set(x, y, colour)
 				route = append(route, image.Point{
 					X: x,
 					Y: y,
@@ -74,7 +76,6 @@ loop:
 
 func (a ConnectedAreas) GenerateMask(scale int) []image.Point {
 	result := make([]image.Point, 0)
-
 	result = append(result, image.Point{X: 0, Y: 0})
 
 	x := 0
@@ -160,7 +161,6 @@ func (a ConnectedAreas) DrawRoute(route []image.Point) *image.Gray {
 		}
 		if float64(x) < minX {
 			minX = float64(x)
-			fmt.Println(x)
 		}
 		if float64(y) < minY {
 			minY = float64(y)
@@ -197,5 +197,5 @@ func (a ConnectedAreas) HasArea() bool {
 }
 
 func CreateConnectedAreasAnalyzer(img *image.Gray) ConnectedAreas {
-	return ConnectedAreas{Image: img, Areas: make([]*image.Gray, 0)}
+	return ConnectedAreas{Image: img, Figures: make([]figure.Figure, 0)}
 }
