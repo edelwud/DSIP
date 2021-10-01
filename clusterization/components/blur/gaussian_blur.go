@@ -1,7 +1,6 @@
 package blur
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"math"
@@ -49,8 +48,6 @@ func (b GaussianBlur) GenerateKernel() [][]float64 {
 func (b GaussianBlur) Process() image.Image {
 	blurred := image.NewRGBA(b.Image.Bounds())
 	kernel := b.GenerateKernel()
-
-	fmt.Println(kernel)
 
 	for x := blurred.Bounds().Min.X + b.Radius; x < blurred.Bounds().Max.X-b.Radius; x++ {
 		for y := blurred.Bounds().Min.Y + b.Radius; y < blurred.Bounds().Max.Y-b.Radius; y++ {
