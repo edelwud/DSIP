@@ -35,7 +35,8 @@ func TestArrangeShapes(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	connectedAreas := CreateConnectedAreasAnalyzer(binarizedImage, 30)
+	contourMask := CreateContourAreaMask()
+	connectedAreas := CreateConnectedAreasAnalyzer(bin.Process(), contourMask, 30)
 	figures := connectedAreas.FindConnectedAreas()
 	x, y := connectedAreas.Image.Bounds().Max.X, connectedAreas.Image.Bounds().Max.Y
 

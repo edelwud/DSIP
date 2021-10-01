@@ -10,6 +10,7 @@ import (
 type ConnectedAreas struct {
 	Image   *image.Gray
 	Figures []figure.Figure
+	Mask    AreaMask
 	Scale   int
 }
 
@@ -49,7 +50,7 @@ func (a ConnectedAreas) WalkThroughArea() []image.Point {
 
 	x, y := point.X, point.Y
 
-	mask := a.GenerateMask(a.Scale)
+	mask := a.Mask.Generate(a.Scale)
 
 loop:
 	for {
@@ -70,72 +71,6 @@ loop:
 	}
 
 	return route
-}
-
-// GenerateMask generates mask for area analysis
-func (a ConnectedAreas) GenerateMask(scale int) []image.Point {
-	result := make([]image.Point, 0)
-	result = append(result, image.Point{X: 0, Y: 0})
-
-	x := 0
-	y := 0
-
-	var pawn bool
-	width := 1
-	height := 1
-
-	for width <= scale {
-		xFlag := false
-		yFlag := true
-		flag := -width - (width - 1)
-		x++
-
-		result = append(result, image.Point{X: x, Y: 1 - width})
-
-		for x != width || y != -height {
-			if flag > 0 {
-				if x == width {
-					xFlag = false
-				}
-				if x == -width {
-					xFlag = true
-				}
-				if xFlag {
-					x++
-				} else {
-					x--
-				}
-				pawn = true
-				flag--
-			} else {
-				if y == height {
-					yFlag = false
-				}
-				if y == -height {
-					yFlag = true
-				}
-				if yFlag {
-					y++
-				} else {
-					y--
-				}
-				pawn = false
-				flag++
-			}
-			result = append(result, image.Point{X: x, Y: y})
-			if flag == 0 {
-				if pawn {
-					flag = -2 * width
-				} else {
-					flag = +2 * width
-				}
-			}
-		}
-		width++
-		height++
-	}
-
-	return result
 }
 
 // ClearRoute clears route in parent image
@@ -160,9 +95,10 @@ func (a ConnectedAreas) HasArea() bool {
 }
 
 // CreateConnectedAreasAnalyzer creates ConnectedAreas exemplar
-func CreateConnectedAreasAnalyzer(img *image.Gray, scale int) ConnectedAreas {
+func CreateConnectedAreasAnalyzer(img *image.Gray, mask AreaMask, scale int) ConnectedAreas {
 	return ConnectedAreas{
 		Image:   img,
+		Mask:    mask,
 		Scale:   scale,
 		Figures: make([]figure.Figure, 0),
 	}
