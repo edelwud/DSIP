@@ -8,10 +8,11 @@ import (
 )
 
 const (
-	ImageArrangeShapes            = "./../../resources/easy/P0001460.jpg"
+	ImageArrangeShapes            = "./../../resources/easy/P0001461.jpg"
 	ImageArrangeShapesGaussian    = "./../../resources/easy_output/image_arranged_shapes_gaussian.jpg"
 	ImageArrangeShapesGaussianBin = "./../../resources/easy_output/image_arranged_shapes_gaussian_bin.jpg"
 	ImageArrangeShapesStore       = "./../../resources/easy_output/image_arranged_shapes.jpg"
+	ImageArrangeShapesTestStore   = "./../../resources/easy_output/image_arranged_shapes_test.jpg"
 )
 
 func TestArrangeShapes(t *testing.T) {
@@ -36,12 +37,17 @@ func TestArrangeShapes(t *testing.T) {
 	}
 
 	contourMask := CreateContourAreaMask()
-	connectedAreas := CreateConnectedAreasAnalyzer(bin.Process(), contourMask, 30)
+	connectedAreas := CreateConnectedAreasAnalyzer(bin.Process(), contourMask, 1)
 	figures := connectedAreas.FindConnectedAreas()
 	x, y := connectedAreas.Image.Bounds().Max.X, connectedAreas.Image.Bounds().Max.Y
 
 	arrangedShapes := ArrangeShapes(figures, x, y)
 	err = utils.WriteImageJpeg(arrangedShapes, ImageArrangeShapesStore)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = utils.WriteImageJpeg(connectedAreas.Image, ImageArrangeShapesTestStore)
 	if err != nil {
 		t.Fatal(err)
 	}

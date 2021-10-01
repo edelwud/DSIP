@@ -13,7 +13,7 @@ func (m ContourAreaMask) Generate(scale int) []image.Point {
 	m.Mask = append(m.Mask, image.Point{X: 0, Y: 0})
 
 	x := 0
-	y := 0
+	y := -1
 
 	var pawn bool
 	width := 1
@@ -22,12 +22,13 @@ func (m ContourAreaMask) Generate(scale int) []image.Point {
 	for width <= scale {
 		xFlag := false
 		yFlag := true
-		flag := -width - (width - 1)
+		flag := -width
 		x++
+		y++
 
-		m.Mask = append(m.Mask, image.Point{X: x, Y: 1 - width})
+		m.Mask = append(m.Mask, image.Point{X: x, Y: 0})
 
-		for x != width || y != -height {
+		for x != width || y != -1 {
 			if flag > 0 {
 				if x == width {
 					xFlag = false
