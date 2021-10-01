@@ -20,10 +20,7 @@ func (a *ConnectedAreas) FindConnectedAreas() []figure.Figure {
 	for a.HasArea() {
 		route := a.WalkThroughArea()
 		img := a.DrawRoute(route)
-		a.Figures = append(a.Figures, figure.Figure{
-			Snapshot: img,
-			Route:    route,
-		})
+		a.Figures = append(a.Figures, figure.CreateFigure(img, route))
 	}
 
 	return a.Figures
