@@ -12,6 +12,7 @@ type Figure struct {
 	Relative []image.Point
 }
 
+// CalculateRelative calculates Figure.Relative route
 func (f *Figure) CalculateRelative() (width int, height int) {
 	maxX := 0
 	maxY := 0
@@ -56,6 +57,7 @@ func (f *Figure) DrawRoute() {
 	}
 }
 
+// CreateFigure initializes Figure exemplar
 func CreateFigure(route []image.Point) Figure {
 	figure := Figure{
 		Route:    route,
