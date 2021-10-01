@@ -6,6 +6,7 @@ import (
 	"math"
 )
 
+// Figure analysis methods implementation
 type Figure struct {
 	Snapshot *image.Gray
 	Route    []image.Point
