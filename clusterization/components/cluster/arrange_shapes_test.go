@@ -1,8 +1,8 @@
-package utils
+package cluster
 
 import (
 	"clusterization/components/binarization"
-	"clusterization/components/cluster"
+	"clusterization/components/utils"
 	"testing"
 )
 
@@ -11,22 +11,22 @@ const (
 	ImageArrangeShapesStore = "./../../resources/easy_output/image_arranged_shapes.jpg"
 )
 
-func TestConnectedAreas_FindConnectedAreas(t *testing.T) {
-	image, err := ReadImageJpeg(ImageArrangeShapes)
+func TestArrangeShapes(t *testing.T) {
+	image, err := utils.ReadImageJpeg(ImageArrangeShapes)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	grayImage := GrayscaleImage(image)
+	grayImage := utils.GrayscaleImage(image)
 	bin := binarization.CreateThresholdBinarization(grayImage, 200)
 
-	connectedAreas := cluster.CreateConnectedAreasAnalyzer(bin.Process(), 30)
+	connectedAreas := CreateConnectedAreasAnalyzer(bin.Process(), 30)
 	figures := connectedAreas.FindConnectedAreas()
 
 	x, y := connectedAreas.Image.Bounds().Max.X, connectedAreas.Image.Bounds().Max.Y
 
 	arrangedShapes := ArrangeShapes(figures, x, y)
-	err = WriteImageJpeg(arrangedShapes, ImageArrangeShapesStore)
+	err = utils.WriteImageJpeg(arrangedShapes, ImageArrangeShapesStore)
 	if err != nil {
 		t.Fatal(err)
 	}
