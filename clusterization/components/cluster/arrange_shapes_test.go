@@ -2,13 +2,16 @@ package cluster
 
 import (
 	"clusterization/components/binarization"
+	"clusterization/components/blur"
 	"clusterization/components/utils"
 	"testing"
 )
 
 const (
-	ImageArrangeShapes      = "./../../resources/easy/P0001460.jpg"
-	ImageArrangeShapesStore = "./../../resources/easy_output/image_arranged_shapes.jpg"
+	ImageArrangeShapes            = "./../../resources/easy/P0001460.jpg"
+	ImageArrangeShapesGaussian    = "./../../resources/easy_output/image_arranged_shapes_gaussian.jpg"
+	ImageArrangeShapesGaussianBin = "./../../resources/easy_output/image_arranged_shapes_gaussian_bin.jpg"
+	ImageArrangeShapesStore       = "./../../resources/easy_output/image_arranged_shapes.jpg"
 )
 
 func TestArrangeShapes(t *testing.T) {
@@ -17,12 +20,23 @@ func TestArrangeShapes(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	grayImage := utils.GrayscaleImage(image)
+	gaussianBlur := blur.CreateGaussianBlur(image, 5)
+	blurredImage := gaussianBlur.Process()
+	err = utils.WriteImageJpeg(blurredImage, ImageArrangeShapesGaussian)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	grayImage := utils.GrayscaleImage(blurredImage)
 	bin := binarization.CreateThresholdBinarization(grayImage, 200)
+	binarizedImage := bin.Process()
+	err = utils.WriteImageJpeg(binarizedImage, ImageArrangeShapesGaussianBin)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	connectedAreas := CreateConnectedAreasAnalyzer(bin.Process(), 30)
+	connectedAreas := CreateConnectedAreasAnalyzer(binarizedImage, 30)
 	figures := connectedAreas.FindConnectedAreas()
-
 	x, y := connectedAreas.Image.Bounds().Max.X, connectedAreas.Image.Bounds().Max.Y
 
 	arrangedShapes := ArrangeShapes(figures, x, y)

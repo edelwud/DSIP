@@ -2,6 +2,7 @@ package cluster
 
 import (
 	"clusterization/components/binarization"
+	"clusterization/components/blur"
 	"clusterization/components/utils"
 	"strconv"
 	"testing"
@@ -18,7 +19,8 @@ func TestConnectedAreas_FindConnectedAreas(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	grayImage := utils.GrayscaleImage(image)
+	gaussianBlur := blur.CreateGaussianBlur(image, 5)
+	grayImage := utils.GrayscaleImage(gaussianBlur.Process())
 	bin := binarization.CreateThresholdBinarization(grayImage, 200)
 
 	connectedAreas := CreateConnectedAreasAnalyzer(bin.Process(), 30)
