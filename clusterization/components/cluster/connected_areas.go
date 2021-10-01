@@ -175,16 +175,18 @@ func (a ConnectedAreas) DrawRoute(route []image.Point) *image.Gray {
 		}
 	}
 
-	for i, point := range route {
-		route[i] = image.Point{
+	path := make([]image.Point, 0)
+
+	for _, point := range route {
+		path = append(path, image.Point{
 			X: point.X - int(minX),
 			Y: point.Y - int(minY),
-		}
+		})
 	}
 
 	img := image.NewGray(image.Rect(0, 0, maxX-int(minX), maxY-int(minY)))
 
-	for _, point := range route {
+	for _, point := range path {
 		x, y := point.X, point.Y
 		img.Set(x, y, color.Gray{Y: 255})
 	}
