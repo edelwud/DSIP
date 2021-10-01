@@ -2,10 +2,8 @@ package cluster
 
 import (
 	"clusterization/components/figure"
-	"clusterization/components/utils"
 	"image"
 	"image/color"
-	"math"
 )
 
 // ConnectedAreas finds connected areas in binarized images
@@ -19,8 +17,7 @@ type ConnectedAreas struct {
 func (a *ConnectedAreas) FindConnectedAreas() []figure.Figure {
 	for a.HasArea() {
 		route := a.WalkThroughArea()
-		img := a.DrawRoute(route)
-		a.Figures = append(a.Figures, figure.CreateFigure(img, route))
+		a.Figures = append(a.Figures, figure.CreateFigure(route))
 	}
 
 	return a.Figures
@@ -53,7 +50,6 @@ func (a ConnectedAreas) WalkThroughArea() []image.Point {
 	x, y := point.X, point.Y
 
 	mask := a.GenerateMask(a.Scale)
-	colour := utils.GenerateRandomColour()
 
 loop:
 	for {
@@ -62,7 +58,7 @@ loop:
 			if intensity == 255 {
 				x += diff.X
 				y += diff.Y
-				a.Image.Set(x, y, colour)
+				a.Image.Set(x, y, color.Gray{Y: 0})
 				route = append(route, image.Point{
 					X: x,
 					Y: y,
@@ -148,47 +144,6 @@ func (a ConnectedAreas) ClearRoute(route []image.Point) {
 		x, y := point.X, point.Y
 		a.Image.Set(x, y, color.Gray{Y: 0})
 	}
-}
-
-// DrawRoute draws new image from route
-func (a ConnectedAreas) DrawRoute(route []image.Point) *image.Gray {
-	maxX := 0
-	maxY := 0
-	minX := math.Inf(1)
-	minY := math.Inf(1)
-	for _, point := range route {
-		x, y := point.X, point.Y
-		if x > maxX {
-			maxX = x
-		}
-		if y > maxY {
-			maxY = y
-		}
-		if float64(x) < minX {
-			minX = float64(x)
-		}
-		if float64(y) < minY {
-			minY = float64(y)
-		}
-	}
-
-	path := make([]image.Point, 0)
-
-	for _, point := range route {
-		path = append(path, image.Point{
-			X: point.X - int(minX),
-			Y: point.Y - int(minY),
-		})
-	}
-
-	img := image.NewGray(image.Rect(0, 0, maxX-int(minX), maxY-int(minY)))
-
-	for _, point := range path {
-		x, y := point.X, point.Y
-		img.Set(x, y, color.Gray{Y: 255})
-	}
-
-	return img
 }
 
 // HasArea looks for white areas in parent image

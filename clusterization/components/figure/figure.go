@@ -2,6 +2,7 @@ package figure
 
 import (
 	"image"
+	"image/color"
 	"math"
 )
 
@@ -11,7 +12,7 @@ type Figure struct {
 	Relative []image.Point
 }
 
-func (f Figure) CalculateRelative() {
+func (f *Figure) CalculateRelative() (width int, height int) {
 	maxX := 0
 	maxY := 0
 	minX := math.Inf(1)
@@ -33,18 +34,33 @@ func (f Figure) CalculateRelative() {
 		}
 	}
 
+	f.Relative = make([]image.Point, 0)
+
 	for _, point := range f.Route {
 		f.Relative = append(f.Relative, image.Point{
 			X: point.X - int(minX),
 			Y: point.Y - int(minY),
 		})
 	}
+
+	return maxX, maxY
 }
 
-func CreateFigure(snapshot *image.Gray, route []image.Point) Figure {
-	return Figure{
-		Snapshot: snapshot,
+// DrawRoute draws Figure.Snapshot from route
+func (f *Figure) DrawRoute() {
+	width, height := f.CalculateRelative()
+	f.Snapshot = image.NewGray(image.Rect(0, 0, width, height))
+
+	for _, point := range f.Relative {
+		f.Snapshot.Set(point.X, point.Y, color.Gray{Y: 255})
+	}
+}
+
+func CreateFigure(route []image.Point) Figure {
+	figure := Figure{
 		Route:    route,
 		Relative: make([]image.Point, 0),
 	}
+	figure.DrawRoute()
+	return figure
 }
