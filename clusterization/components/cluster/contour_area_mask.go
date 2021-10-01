@@ -2,6 +2,7 @@ package cluster
 
 import "image"
 
+// ContourAreaMask implements counter area mask for connected area analysis
 type ContourAreaMask struct {
 	Mask []image.Point
 }
@@ -72,6 +73,7 @@ func (m ContourAreaMask) Generate(scale int) []image.Point {
 	return m.Mask
 }
 
+// CreateContourAreaMask initialized ContourAreaMask exemplar
 func CreateContourAreaMask() AreaMask {
 	return &ContourAreaMask{
 		Mask: nil,
