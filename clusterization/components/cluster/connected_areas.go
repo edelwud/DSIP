@@ -74,11 +74,6 @@ loop:
 				if intensity == 255 {
 					x = r.X + diff.X
 					y = r.Y + diff.Y
-					a.Image.Set(x, y, color.Gray{Y: 0})
-					route = append(route, image.Point{
-						X: x,
-						Y: y,
-					})
 					continue loop
 				}
 			}

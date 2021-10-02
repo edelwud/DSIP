@@ -24,7 +24,7 @@ func TestConnectedAreas_FindConnectedAreas(t *testing.T) {
 	bin := binarization.CreateThresholdBinarization(grayImage, 200)
 
 	contourMask := CreateContourAreaMask()
-	connectedAreas := CreateConnectedAreasAnalyzer(bin.Process(), contourMask, 31)
+	connectedAreas := CreateConnectedAreasAnalyzer(bin.Process(), contourMask, 1)
 	figures := connectedAreas.FindConnectedAreas()
 
 	err = utils.WriteImageJpeg(connectedAreas.Image, ImageConnectedAreasStore)
