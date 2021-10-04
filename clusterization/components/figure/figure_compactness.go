@@ -14,7 +14,7 @@ func (f Figure) FindSquare() int {
 
 // FindPerimeter finds figure perimeter
 func (f Figure) FindPerimeter() int {
-	perimeterRoute := make(map[int][]int, 0)
+	perimeterRoute := make(map[int][]int)
 	prevIntensity := 0
 
 	for y := f.Snapshot.Bounds().Min.Y - 1; y < f.Snapshot.Bounds().Max.Y+1; y++ {
