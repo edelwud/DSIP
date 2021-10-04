@@ -1,12 +1,29 @@
 package figure
 
-import "image"
+import (
+	"image"
+	"math"
+)
 
 // Dimensions declares minimum interface for dimensions functionality implementation
 type Dimensions interface {
 	FindCenterOfMass() (int, int)
+	FindDiscreteCentralMoment(int, int) int
 	FindDimensions() (image.Point, image.Point)
 	CalculateRelative() []image.Point
+}
+
+// FindDiscreteCentralMoment finds discrete central moment for figure
+func (f Figure) FindDiscreteCentralMoment(i int, j int) int {
+	moment := 0.0
+
+	cx, cy := f.FindCenterOfMass()
+
+	for _, point := range f.Relative {
+		moment += math.Pow(float64(point.X-cx), float64(i)) * math.Pow(float64(point.Y-cy), float64(j))
+	}
+
+	return int(moment)
 }
 
 // FindCenterOfMass finds center of mass for figure
