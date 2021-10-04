@@ -2,6 +2,7 @@ package cluster
 
 import (
 	"clusterization/components/figure"
+	"clusterization/components/mask"
 	"image"
 	"image/color"
 )
@@ -10,7 +11,7 @@ import (
 type ConnectedAreas struct {
 	Image   *image.Gray
 	Figures []figure.Figure
-	Mask    AreaMask
+	Mask    mask.AreaMask
 	Scale   int
 }
 
@@ -50,11 +51,11 @@ func (a ConnectedAreas) WalkThroughArea() []image.Point {
 
 	x, y := point.X, point.Y
 
-	mask := a.Mask.Generate(a.Scale)
+	m := a.Mask.Generate(a.Scale)
 
 loop:
 	for {
-		for _, diff := range mask {
+		for _, diff := range m {
 			intensity := a.Image.GrayAt(x+diff.X, y+diff.Y).Y
 			if intensity == 255 {
 				x += diff.X
@@ -69,7 +70,7 @@ loop:
 		}
 
 		for _, r := range route {
-			for _, diff := range mask {
+			for _, diff := range m {
 				intensity := a.Image.GrayAt(r.X+diff.X, r.Y+diff.Y).Y
 				if intensity == 255 {
 					x = r.X + diff.X
@@ -108,7 +109,7 @@ func (a ConnectedAreas) HasArea() bool {
 }
 
 // CreateConnectedAreasAnalyzer creates ConnectedAreas exemplar
-func CreateConnectedAreasAnalyzer(img *image.Gray, mask AreaMask, scale int) ConnectedAreas {
+func CreateConnectedAreasAnalyzer(img *image.Gray, mask mask.AreaMask, scale int) ConnectedAreas {
 	return ConnectedAreas{
 		Image:   img,
 		Mask:    mask,

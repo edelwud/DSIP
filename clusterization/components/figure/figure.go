@@ -30,8 +30,21 @@ func (f Figure) FindSquare() int {
 }
 
 func (f Figure) FindPerimeter() int {
-	_, max := f.FindDimensions()
-	return 2*max.X + 2*max.Y
+	prevIntensity := 0
+	perimeter := 0
+
+	for y := f.Snapshot.Bounds().Min.Y; y < f.Snapshot.Bounds().Max.Y; y++ {
+		for x := f.Snapshot.Bounds().Min.X; x < f.Snapshot.Bounds().Max.X; x++ {
+			currIntensity := int(f.Snapshot.GrayAt(x, y).Y)
+			if currIntensity != prevIntensity {
+				perimeter++
+			}
+			prevIntensity = currIntensity
+		}
+		prevIntensity = 0
+	}
+
+	return perimeter
 }
 
 func (f Figure) FindDimensions() (min image.Point, max image.Point) {
@@ -84,13 +97,14 @@ func (f *Figure) DrawRoute() {
 	relative := f.CalculateRelative()
 	x, y := f.FindCenterOfMass()
 
-	println(width, height)
-
 	f.Snapshot = image.NewGray(image.Rect(0, 0, width, height))
 
 	for _, point := range relative {
 		f.Snapshot.Set(point.X, point.Y, color.Gray{Y: 100})
 	}
+
+	perimeter := f.FindPerimeter()
+	println(perimeter * perimeter / f.FindSquare())
 
 	f.Snapshot.Set(x, y, color.Gray{Y: 255})
 }

@@ -3,6 +3,7 @@ package cluster
 import (
 	"clusterization/components/binarization"
 	"clusterization/components/blur"
+	"clusterization/components/mask"
 	"clusterization/components/utils"
 	"strconv"
 	"testing"
@@ -23,7 +24,7 @@ func TestConnectedAreas_FindConnectedAreas(t *testing.T) {
 	grayImage := utils.GrayscaleImage(gaussianBlur.Process())
 	bin := binarization.CreateThresholdBinarization(grayImage, 200)
 
-	contourMask := CreateContourAreaMask()
+	contourMask := mask.CreateContourAreaMask()
 	connectedAreas := CreateConnectedAreasAnalyzer(bin.Process(), contourMask, 1)
 	figures := connectedAreas.FindConnectedAreas()
 

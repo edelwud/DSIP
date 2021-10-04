@@ -3,6 +3,7 @@ package cluster
 import (
 	"clusterization/components/binarization"
 	"clusterization/components/blur"
+	"clusterization/components/mask"
 	"clusterization/components/utils"
 	"testing"
 )
@@ -36,7 +37,7 @@ func TestArrangeShapes(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	contourMask := CreateContourAreaMask()
+	contourMask := mask.CreateContourAreaMask()
 	connectedAreas := CreateConnectedAreasAnalyzer(bin.Process(), contourMask, 1)
 	figures := connectedAreas.FindConnectedAreas()
 	x, y := connectedAreas.Image.Bounds().Max.X, connectedAreas.Image.Bounds().Max.Y
