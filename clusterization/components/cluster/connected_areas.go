@@ -9,17 +9,19 @@ import (
 
 // ConnectedAreas finds connected areas in binarized images
 type ConnectedAreas struct {
-	Image   *image.Gray
-	Figures []figure.Figure
-	Mask    mask.AreaMask
-	Scale   int
+	Image     image.Image
+	Grayscale *image.Gray
+	Bin       *image.Gray
+	Figures   []figure.Figure
+	Mask      mask.AreaMask
+	Scale     int
 }
 
 // FindConnectedAreas processes image scanning to find connected areas
 func (a *ConnectedAreas) FindConnectedAreas() []figure.Figure {
 	for a.HasArea() {
 		route := a.WalkThroughArea()
-		a.Figures = append(a.Figures, figure.CreateFigure(route))
+		a.Figures = append(a.Figures, figure.CreateFigure(a.Image, a.Grayscale, route))
 	}
 
 	return a.Figures
@@ -27,9 +29,9 @@ func (a *ConnectedAreas) FindConnectedAreas() []figure.Figure {
 
 // GetStartPoint returns start point for WalkThroughArea
 func (a ConnectedAreas) GetStartPoint() *image.Point {
-	for y := a.Image.Bounds().Min.Y; y < a.Image.Bounds().Max.Y; y++ {
-		for x := a.Image.Bounds().Min.X; x < a.Image.Bounds().Max.X; x++ {
-			if a.Image.GrayAt(x, y).Y == 255 {
+	for y := a.Bin.Bounds().Min.Y; y < a.Bin.Bounds().Max.Y; y++ {
+		for x := a.Bin.Bounds().Min.X; x < a.Bin.Bounds().Max.X; x++ {
+			if a.Bin.GrayAt(x, y).Y == 255 {
 				return &image.Point{
 					X: x,
 					Y: y,
@@ -56,11 +58,11 @@ func (a ConnectedAreas) WalkThroughArea() []image.Point {
 loop:
 	for {
 		for _, diff := range m {
-			intensity := a.Image.GrayAt(x+diff.X, y+diff.Y).Y
+			intensity := a.Bin.GrayAt(x+diff.X, y+diff.Y).Y
 			if intensity == 255 {
 				x += diff.X
 				y += diff.Y
-				a.Image.Set(x, y, color.Gray{Y: 0})
+				a.Bin.Set(x, y, color.Gray{Y: 0})
 				route = append(route, image.Point{
 					X: x,
 					Y: y,
@@ -71,7 +73,7 @@ loop:
 
 		for _, r := range route {
 			for _, diff := range m {
-				intensity := a.Image.GrayAt(r.X+diff.X, r.Y+diff.Y).Y
+				intensity := a.Bin.GrayAt(r.X+diff.X, r.Y+diff.Y).Y
 				if intensity == 255 {
 					x = r.X + diff.X
 					y = r.Y + diff.Y
@@ -80,7 +82,7 @@ loop:
 			}
 		}
 
-		a.Image.Set(x, y, color.Gray{Y: 200})
+		a.Bin.Set(x, y, color.Gray{Y: 200})
 		break
 	}
 
@@ -91,15 +93,15 @@ loop:
 func (a ConnectedAreas) ClearRoute(route []image.Point) {
 	for _, point := range route {
 		x, y := point.X, point.Y
-		a.Image.Set(x, y, color.Gray{Y: 0})
+		a.Bin.Set(x, y, color.Gray{Y: 0})
 	}
 }
 
 // HasArea looks for white areas in parent image
 func (a ConnectedAreas) HasArea() bool {
-	for y := a.Image.Bounds().Min.Y; y < a.Image.Bounds().Max.Y; y++ {
-		for x := a.Image.Bounds().Min.X; x < a.Image.Bounds().Max.X; x++ {
-			intensity := a.Image.GrayAt(x, y).Y
+	for y := a.Bin.Bounds().Min.Y; y < a.Bin.Bounds().Max.Y; y++ {
+		for x := a.Bin.Bounds().Min.X; x < a.Bin.Bounds().Max.X; x++ {
+			intensity := a.Bin.GrayAt(x, y).Y
 			if intensity == 255 {
 				return true
 			}
@@ -109,11 +111,13 @@ func (a ConnectedAreas) HasArea() bool {
 }
 
 // CreateConnectedAreasAnalyzer creates ConnectedAreas exemplar
-func CreateConnectedAreasAnalyzer(img *image.Gray, mask mask.AreaMask, scale int) ConnectedAreas {
+func CreateConnectedAreasAnalyzer(img image.Image, grayscale *image.Gray, bin *image.Gray, mask mask.AreaMask, scale int) ConnectedAreas {
 	return ConnectedAreas{
-		Image:   img,
-		Mask:    mask,
-		Scale:   scale,
-		Figures: make([]figure.Figure, 0),
+		Image:     img,
+		Grayscale: grayscale,
+		Bin:       bin,
+		Mask:      mask,
+		Scale:     scale,
+		Figures:   make([]figure.Figure, 0),
 	}
 }

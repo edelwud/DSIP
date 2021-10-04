@@ -1,15 +1,18 @@
 package figure
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 )
 
 // Figure analysis methods implementation
 type Figure struct {
-	Snapshot *image.Gray
-	Route    []image.Point
-	Relative []image.Point
+	Image     image.Image
+	Grayscale *image.Gray
+	Snapshot  *image.Gray
+	Route     []image.Point
+	Relative  []image.Point
 }
 
 // DrawRoute draws Figure.Snapshot from route
@@ -27,16 +30,18 @@ func (f *Figure) DrawRoute() {
 }
 
 // CreateFigure initializes Figure exemplar
-func CreateFigure(route []image.Point) Figure {
+func CreateFigure(img image.Image, grayscale *image.Gray, route []image.Point) Figure {
 	figure := Figure{
-		Route:    route,
-		Relative: make([]image.Point, 0),
+		Image:     img,
+		Grayscale: grayscale,
+		Route:     route,
+		Relative:  make([]image.Point, 0),
 	}
 
 	figure.DrawRoute()
 
-	el := figure.FindAxisOfInertia()
-	println(el)
+	el := figure.AverageColor()
+	fmt.Println(el)
 
 	return figure
 }
