@@ -32,10 +32,8 @@ func CreateFigure(route []image.Point) Figure {
 		Route:    route,
 		Relative: make([]image.Point, 0),
 	}
-	figure.DrawRoute()
 
-	perimeter := figure.FindPerimeter()
-	println((perimeter * perimeter) / figure.FindSquare())
+	figure.DrawRoute()
 
 	return figure
 }
