@@ -35,7 +35,7 @@ func CreateFigure(route []image.Point) Figure {
 
 	figure.DrawRoute()
 
-	el := figure.FindElongation()
+	el := figure.FindAxisOfInertia()
 	println(el)
 
 	return figure
