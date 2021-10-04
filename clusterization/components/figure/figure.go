@@ -35,5 +35,8 @@ func CreateFigure(route []image.Point) Figure {
 
 	figure.DrawRoute()
 
+	el := figure.FindElongation()
+	println(el)
+
 	return figure
 }
