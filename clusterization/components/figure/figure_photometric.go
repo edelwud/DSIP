@@ -39,10 +39,10 @@ func (f Figure) AverageColor() color.RGBA {
 	}
 
 	return color.RGBA{
-		R: uint8(r),
-		G: uint8(g),
-		B: uint8(b),
-		A: uint8(aa),
+		R: uint8(r / float64(len(f.Route))),
+		G: uint8(g / float64(len(f.Route))),
+		B: uint8(b / float64(len(f.Route))),
+		A: uint8(aa / float64(len(f.Route))),
 	}
 }
 
