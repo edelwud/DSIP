@@ -3,7 +3,6 @@ package figure
 import (
 	"image"
 	"image/color"
-	"math"
 )
 
 // Figure analysis methods implementation
@@ -51,8 +50,8 @@ func (f Figure) FindDimensions() (min image.Point, max image.Point) {
 	max.X = 0
 	max.Y = 0
 
-	min.X = math.MaxInt
-	min.Y = math.MaxInt
+	min.X = (1 << 31) - 1
+	min.Y = (1 << 31) - 1
 
 	for _, point := range f.Route {
 		x, y := point.X, point.Y
@@ -95,18 +94,12 @@ func (f *Figure) DrawRoute() {
 	width, height := max.X-min.X, max.Y-min.Y
 
 	relative := f.CalculateRelative()
-	x, y := f.FindCenterOfMass()
 
 	f.Snapshot = image.NewGray(image.Rect(0, 0, width, height))
 
 	for _, point := range relative {
 		f.Snapshot.Set(point.X, point.Y, color.Gray{Y: 100})
 	}
-
-	perimeter := f.FindPerimeter()
-	println(perimeter * perimeter / f.FindSquare())
-
-	f.Snapshot.Set(x, y, color.Gray{Y: 255})
 }
 
 // CreateFigure initializes Figure exemplar
@@ -116,5 +109,9 @@ func CreateFigure(route []image.Point) Figure {
 		Relative: make([]image.Point, 0),
 	}
 	figure.DrawRoute()
+
+	perimeter := figure.FindPerimeter()
+	println(perimeter * perimeter / figure.FindSquare())
+
 	return figure
 }
