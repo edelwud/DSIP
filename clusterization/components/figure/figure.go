@@ -29,21 +29,51 @@ func (f Figure) FindSquare() int {
 }
 
 func (f Figure) FindPerimeter() int {
+	perimeterRoute := make(map[int][]int, 0)
 	prevIntensity := 0
-	perimeter := 0
 
-	for y := f.Snapshot.Bounds().Min.Y; y < f.Snapshot.Bounds().Max.Y; y++ {
-		for x := f.Snapshot.Bounds().Min.X; x < f.Snapshot.Bounds().Max.X; x++ {
+	for y := f.Snapshot.Bounds().Min.Y - 1; y < f.Snapshot.Bounds().Max.Y+1; y++ {
+		for x := f.Snapshot.Bounds().Min.X - 1; x < f.Snapshot.Bounds().Max.X+1; x++ {
 			currIntensity := int(f.Snapshot.GrayAt(x, y).Y)
 			if currIntensity != prevIntensity {
-				perimeter++
+				perimeterRoute[x] = append(perimeterRoute[x], y)
 			}
 			prevIntensity = currIntensity
 		}
 		prevIntensity = 0
 	}
 
+	for x := f.Snapshot.Bounds().Min.X - 1; x < f.Snapshot.Bounds().Max.X+1; x++ {
+		for y := f.Snapshot.Bounds().Min.Y - 1; y < f.Snapshot.Bounds().Max.Y+1; y++ {
+			currIntensity := int(f.Snapshot.GrayAt(x, y).Y)
+			if currIntensity != prevIntensity {
+				found := false
+				for _, y1 := range perimeterRoute[x] {
+					if y1 == y {
+						found = true
+					}
+				}
+				if !found {
+					perimeterRoute[x] = append(perimeterRoute[x], y)
+				}
+			}
+			prevIntensity = currIntensity
+		}
+		prevIntensity = 0
+	}
+
+	perimeter := 0
+	for _, ySlice := range perimeterRoute {
+		perimeter += len(ySlice)
+	}
+
 	return perimeter
+}
+
+func (f Figure) FindCompactness() int {
+	perimeter := f.FindPerimeter()
+	square := f.FindSquare()
+	return perimeter * perimeter / square
 }
 
 func (f Figure) FindDimensions() (min image.Point, max image.Point) {
@@ -98,7 +128,7 @@ func (f *Figure) DrawRoute() {
 	f.Snapshot = image.NewGray(image.Rect(0, 0, width, height))
 
 	for _, point := range relative {
-		f.Snapshot.Set(point.X, point.Y, color.Gray{Y: 100})
+		f.Snapshot.Set(point.X, point.Y, color.Gray{Y: 255})
 	}
 }
 
@@ -111,7 +141,7 @@ func CreateFigure(route []image.Point) Figure {
 	figure.DrawRoute()
 
 	perimeter := figure.FindPerimeter()
-	println(perimeter * perimeter / figure.FindSquare())
+	println((perimeter * perimeter) / figure.FindSquare())
 
 	return figure
 }
