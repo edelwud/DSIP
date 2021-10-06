@@ -1,7 +1,6 @@
 package figure
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 )
@@ -39,9 +38,6 @@ func CreateFigure(img image.Image, grayscale *image.Gray, route []image.Point) F
 	}
 
 	figure.DrawRoute()
-
-	el := figure.AverageColor()
-	fmt.Println(el)
 
 	return figure
 }

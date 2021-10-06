@@ -81,8 +81,6 @@ loop:
 				}
 			}
 		}
-
-		a.Bin.Set(x, y, color.Gray{Y: 200})
 		break
 	}
 
