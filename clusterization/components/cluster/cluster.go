@@ -82,16 +82,14 @@ func (c BasicCluster) FindClusters(figures [][]*figure.Figure) [][]*figure.Figur
 		if point == nil {
 			break
 		}
-		x := point.X
-		y := point.Y
 
 		result = append(result, nil)
 
 	loop:
 		for {
 			for _, diff := range m {
-				x = point.X + diff.X
-				y = point.Y + diff.Y
+				x := point.X + diff.X
+				y := point.Y + diff.Y
 
 				if x < 0 {
 					continue
