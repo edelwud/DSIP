@@ -11,7 +11,7 @@ type ShuffleNoise struct {
 	Image     *image.Gray
 }
 
-func (n ShuffleNoise) Run() image.Image {
+func (n ShuffleNoise) Run() *image.Gray {
 	shuffled := image.NewGray(n.Image.Bounds())
 
 	x, y := shuffled.Bounds().Dx(), shuffled.Bounds().Dy()
