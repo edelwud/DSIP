@@ -3,12 +3,13 @@ package noise
 import (
 	"hopfield/components/binarization"
 	"hopfield/components/utils"
+	"strconv"
 	"testing"
 )
 
 const (
 	ImagePath = "../../resources/training/train_1.png"
-	ImageDest = "../../resources/temp/train_1_shuffled.png"
+	ImageDest = "../../resources/shuffle/train_1.png"
 )
 
 func TestShuffleNoise_Run(t *testing.T) {
@@ -21,11 +22,14 @@ func TestShuffleNoise_Run(t *testing.T) {
 	threshold := binarization.CreateThresholdBinarization(gray, 128)
 	bin := threshold.Process()
 
-	shuffle := CreateShuffleNoise(bin, 0.10)
-	shuffled := shuffle.Run()
+	for i := 0.0; i <= 1; i += 0.1 {
+		shuffle := CreateShuffleNoise(bin, i)
+		shuffled := shuffle.Run()
 
-	err = utils.WriteImagePNG(shuffled, ImageDest)
-	if err != nil {
-		t.Fatal(err)
+		percent := int(i * 100)
+		err = utils.WriteImagePNG(shuffled, "../../resources/shuffle/train_1_"+strconv.Itoa(percent)+".png")
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
 }
