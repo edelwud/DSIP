@@ -2,6 +2,12 @@ package hopfield
 
 import "image"
 
+type Matrix struct {
+	Data   [][]int
+	Width  int
+	Height int
+}
+
 const (
 	PositiveNormalization = 1
 	NegativeNormalization = -1
@@ -27,7 +33,7 @@ func NormalizeObject(img *image.Gray) []int {
 	return result
 }
 
-func ConvertToMatrix(width int, height int, data []int) [][]int {
+func ConvertToMatrix(width int, height int, data []int) Matrix {
 	matrix := make([][]int, width)
 
 	for i := range matrix {
@@ -35,6 +41,25 @@ func ConvertToMatrix(width int, height int, data []int) [][]int {
 			offset := j*width + i
 			matrix[i] = append(matrix[i], data[offset])
 		}
+	}
+
+	return Matrix{
+		Data:   matrix,
+		Width:  width,
+		Height: height,
+	}
+}
+
+func ZeroingMainDiagonal(matrix Matrix) Matrix {
+	x := matrix.Width
+
+	i := 0
+	j := 0
+
+	for i < x {
+		matrix.Data[i][j] = 0
+		i++
+		j++
 	}
 
 	return matrix
