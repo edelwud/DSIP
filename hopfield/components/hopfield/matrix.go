@@ -38,3 +38,24 @@ func Transpose(matrix Matrix) Matrix {
 		Height: w,
 	}
 }
+
+func Multiplication(m1 Matrix, m2 Matrix) Matrix {
+	w := m1.Width
+	h := m2.Height
+	result := make([][]int, w)
+
+	for i := 0; i < w; i++ {
+		for j := 0; j < h; j++ {
+			result[i] = append(result[i], 0)
+			for k := 0; k < w; k++ {
+				result[i][j] += m1.Data[i][k] * m2.Data[k][j]
+			}
+		}
+	}
+
+	return Matrix{
+		Data:   result,
+		Width:  w,
+		Height: h,
+	}
+}
