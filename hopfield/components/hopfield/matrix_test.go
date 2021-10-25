@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestNormalizeObject(t *testing.T) {
+func TestZeroingMainDiagonal(t *testing.T) {
 	img, err := utils.ReadImagePNG("../../resources/training/train_1.png")
 	if err != nil {
 		t.Fatal(err)
@@ -17,16 +17,12 @@ func TestNormalizeObject(t *testing.T) {
 	binRunner := binarization.CreateThresholdBinarization(gray, 128)
 
 	data := NormalizeObject(binRunner.Process())
-
-	for _, value := range data {
-		if value == PositiveNormalization || value == NegativeNormalization {
-			continue
-		}
-		t.Fatal("unexpected result")
-	}
+	matrix := ConvertToMatrix(img.Bounds().Dx(), img.Bounds().Dy(), data)
+	matrix = ZeroingMainDiagonal(matrix)
+	ffmt.P(matrix)
 }
 
-func TestConvertToMatrix(t *testing.T) {
+func TestTranspose(t *testing.T) {
 	img, err := utils.ReadImagePNG("../../resources/training/train_1.png")
 	if err != nil {
 		t.Fatal(err)
@@ -36,10 +32,7 @@ func TestConvertToMatrix(t *testing.T) {
 	binRunner := binarization.CreateThresholdBinarization(gray, 128)
 
 	data := NormalizeObject(binRunner.Process())
-
 	matrix := ConvertToMatrix(img.Bounds().Dx(), img.Bounds().Dy(), data)
-	_, err = ffmt.P(matrix)
-	if err != nil {
-		t.Fatal(err)
-	}
+	transposedMatrix := Transpose(matrix)
+	ffmt.P(transposedMatrix)
 }
