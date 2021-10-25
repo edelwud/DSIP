@@ -1,7 +1,8 @@
 package hopfield
 
 import (
-	"gonum.org/v1/gonum/mat"
+	"fmt"
+	mat "github.com/gonum/matrix/mat64"
 	"gopkg.in/ffmt.v1"
 	"hopfield/components/binarization"
 	"hopfield/components/utils"
@@ -42,6 +43,26 @@ func TestActivation(t *testing.T) {
 	ffmt.P(activated)
 }
 
+func TestWithForeignParameters(t *testing.T) {
+	images := make([]*mat.Dense, 0)
+	images = append(images, mat.NewDense(1, 4, []float64{
+		-1, 1, -1, 1,
+	}))
+	images = append(images, mat.NewDense(1, 4, []float64{
+		1, -1, 1, 1,
+	}))
+	images = append(images, mat.NewDense(1, 4, []float64{
+		-1, 1, -1, -1,
+	}))
+
+	noised := mat.NewDense(1, 4, []float64{
+		1, -1, 1, -1,
+	})
+
+	m := SyncHopfield(noised, images)
+	fmt.Println(m)
+}
+
 func TestAsyncHopfield(t *testing.T) {
 	dir, err := ioutil.ReadDir("../../resources/training")
 	if err != nil {
@@ -49,8 +70,8 @@ func TestAsyncHopfield(t *testing.T) {
 	}
 
 	images := make([]*mat.Dense, 0)
-	for _, filename := range dir {
-		img, err := utils.ReadImagePNG("../../resources/training/" + filename.Name())
+	for _, _ = range dir {
+		img, err := utils.ReadImagePNG("../../resources/training/train_1.png")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -63,7 +84,7 @@ func TestAsyncHopfield(t *testing.T) {
 		images = append(images, matrix)
 	}
 
-	noised, err := utils.ReadImagePNG("../../resources/shuffle/train_2_30.png")
+	noised, err := utils.ReadImagePNG("../../resources/shuffle/train_1_10.png")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -97,7 +118,7 @@ func TestSyncHopfield(t *testing.T) {
 		images = append(images, matrix)
 	}
 
-	noised, err := utils.ReadImagePNG("../../resources/shuffle/train_2_30.png")
+	noised, err := utils.ReadImagePNG("../../resources/shuffle/train_1_10.png")
 	if err != nil {
 		t.Fatal(err)
 	}
