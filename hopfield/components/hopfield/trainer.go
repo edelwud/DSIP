@@ -3,7 +3,7 @@ package hopfield
 func Combinations(images ...Matrix) [][]Matrix {
 	combinations := make([][]Matrix, 0)
 
-	for i := 0; i < len(images); i++ {
+	for i := 0; i < len(images)-1; i++ {
 		for j := i + 1; j < len(images); j++ {
 			combinations = append(combinations, []Matrix{
 				images[i],

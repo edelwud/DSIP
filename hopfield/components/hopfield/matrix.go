@@ -77,3 +77,18 @@ func Sum(m1 Matrix, m2 Matrix) Matrix {
 		Height: h,
 	}
 }
+
+func Compare(m1 Matrix, m2 Matrix) bool {
+	w := m1.Width
+	h := m2.Height
+
+	for i := 0; i < w; i++ {
+		for j := 0; j < h; j++ {
+			if m1.Data[i][j] != m2.Data[i][j] {
+				return false
+			}
+		}
+	}
+
+	return true
+}
