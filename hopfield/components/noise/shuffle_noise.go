@@ -19,7 +19,7 @@ func (n ShuffleNoise) Run() *image.Gray {
 	for i := 0; i < x; i++ {
 		for j := 0; j < y; j++ {
 			c := n.Image.GrayAt(i, j).Y
-			pattern := n.Intensity - rand.Float64()
+			pattern := n.Intensity - rand.Float64()/0.1
 			if pattern >= 0 {
 				shuffled.Set(i, j, color.Gray{Y: 255 - c})
 			} else {

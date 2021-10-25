@@ -1,11 +1,13 @@
 package hopfield
 
-func Combinations(images ...Matrix) [][]Matrix {
-	combinations := make([][]Matrix, 0)
+import "gonum.org/v1/gonum/mat"
+
+func Combinations(images ...*mat.Dense) [][]*mat.Dense {
+	combinations := make([][]*mat.Dense, 0)
 
 	for i := 0; i < len(images)-1; i++ {
 		for j := i + 1; j < len(images); j++ {
-			combinations = append(combinations, []Matrix{
+			combinations = append(combinations, []*mat.Dense{
 				images[i],
 				images[j],
 			})
@@ -15,27 +17,20 @@ func Combinations(images ...Matrix) [][]Matrix {
 	return combinations
 }
 
-func GetWeights(images ...Matrix) Matrix {
-	w := images[0].Width
-	h := images[0].Height
-
-	result := make([][]int, w)
-	for i := range result {
-		result[i] = make([]int, h)
-	}
+func GetWeights(images ...*mat.Dense) *mat.Dense {
+	r, c := images[0].Dims()
+	result := mat.NewDense(r, c, make([]float64, r*c))
 
 	for _, combination := range Combinations(images...) {
-		m := Multiplication(combination[0], combination[1])
-		result = Sum(m, Matrix{
-			Data:   result,
-			Width:  w,
-			Height: h,
-		}).Data
+		mul := mat.NewDense(r, c, make([]float64, r*c))
+		mul.Mul(combination[0].T(), combination[1])
+		combination[0].T()
+		result.Add(result, mul)
 	}
 
-	return ZeroingMainDiagonal(Matrix{
-		Data:   result,
-		Width:  w,
-		Height: h,
-	})
+	for i := 0; i < r; i++ {
+		result.Set(i, i, 0)
+	}
+
+	return result
 }

@@ -8,8 +8,7 @@ import (
 )
 
 const (
-	ImagePath = "../../resources/training/train_1.png"
-	ImageDest = "../../resources/shuffle/train_1.png"
+	ImagePath = "../../resources/training/train_2.png"
 )
 
 func TestShuffleNoise_Run(t *testing.T) {
@@ -27,7 +26,7 @@ func TestShuffleNoise_Run(t *testing.T) {
 		shuffled := shuffle.Run()
 
 		percent := int(i * 100)
-		err = utils.WriteImagePNG(shuffled, "../../resources/shuffle/train_1_"+strconv.Itoa(percent)+".png")
+		err = utils.WriteImagePNG(shuffled, "../../resources/shuffle/train_2_"+strconv.Itoa(percent)+".png")
 		if err != nil {
 			t.Fatal(err)
 		}

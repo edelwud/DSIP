@@ -1,7 +1,8 @@
 package hopfield
 
 import (
-	ffmt "gopkg.in/ffmt.v1"
+	"gonum.org/v1/gonum/mat"
+	"gopkg.in/ffmt.v1"
 	"hopfield/components/binarization"
 	"hopfield/components/utils"
 	"testing"
@@ -36,8 +37,8 @@ func TestConvertToMatrix(t *testing.T) {
 	binRunner := binarization.CreateThresholdBinarization(gray, 128)
 
 	data := NormalizeObject(binRunner.Process())
+	matrix := mat.NewDense(img.Bounds().Dy(), img.Bounds().Dx(), data)
 
-	matrix := ConvertToMatrix(img.Bounds().Dx(), img.Bounds().Dy(), data)
 	_, err = ffmt.P(matrix)
 	if err != nil {
 		t.Fatal(err)

@@ -1,6 +1,7 @@
 package hopfield
 
 import (
+	"gonum.org/v1/gonum/mat"
 	"gopkg.in/ffmt.v1"
 	"hopfield/components/binarization"
 	"hopfield/components/utils"
@@ -14,7 +15,7 @@ func TestCombinations(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	images := make([]Matrix, 0)
+	images := make([]*mat.Dense, 0)
 	for _, filename := range dir {
 		img, err := utils.ReadImagePNG("../../resources/training/" + filename.Name())
 		if err != nil {
@@ -24,7 +25,7 @@ func TestCombinations(t *testing.T) {
 		gray := utils.GrayscaleImage(img)
 		binRunner := binarization.CreateThresholdBinarization(gray, 128)
 		normalized := NormalizeObject(binRunner.Process())
-		matrix := ConvertToMatrix(img.Bounds().Dx(), img.Bounds().Dy(), normalized)
+		matrix := mat.NewDense(img.Bounds().Dy(), img.Bounds().Dx(), normalized)
 
 		images = append(images, matrix)
 	}
@@ -39,7 +40,7 @@ func TestGetWeights(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	images := make([]Matrix, 0)
+	images := make([]*mat.Dense, 0)
 	for _, filename := range dir {
 		img, err := utils.ReadImagePNG("../../resources/training/" + filename.Name())
 		if err != nil {
@@ -49,7 +50,7 @@ func TestGetWeights(t *testing.T) {
 		gray := utils.GrayscaleImage(img)
 		binRunner := binarization.CreateThresholdBinarization(gray, 128)
 		normalized := NormalizeObject(binRunner.Process())
-		matrix := ConvertToMatrix(img.Bounds().Dx(), img.Bounds().Dy(), normalized)
+		matrix := mat.NewDense(img.Bounds().Dy(), img.Bounds().Dx(), normalized)
 
 		images = append(images, matrix)
 	}
