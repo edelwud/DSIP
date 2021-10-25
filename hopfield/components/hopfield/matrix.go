@@ -59,3 +59,21 @@ func Multiplication(m1 Matrix, m2 Matrix) Matrix {
 		Height: h,
 	}
 }
+
+func Sum(m1 Matrix, m2 Matrix) Matrix {
+	w := m1.Width
+	h := m2.Height
+	result := make([][]int, w)
+
+	for i := 0; i < w; i++ {
+		for j := 0; j < h; j++ {
+			result[i] = append(result[i], m1.Data[i][j]+m2.Data[i][j])
+		}
+	}
+
+	return Matrix{
+		Data:   result,
+		Width:  w,
+		Height: h,
+	}
+}
