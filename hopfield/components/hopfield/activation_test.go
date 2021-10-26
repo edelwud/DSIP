@@ -1,9 +1,7 @@
 package hopfield
 
 import (
-	"fmt"
-	mat "github.com/gonum/matrix/mat64"
-	"gopkg.in/ffmt.v1"
+	"gonum.org/v1/gonum/mat"
 	"hopfield/components/binarization"
 	"hopfield/components/utils"
 	"io/ioutil"
@@ -23,7 +21,7 @@ func TestActivation(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	images := make([]*mat.Dense, 0)
+	images := make([]*mat.VecDense, 0)
 	for _, filename := range dir {
 		img, err := utils.ReadImagePNG("../../resources/training/" + filename.Name())
 		if err != nil {
@@ -33,100 +31,8 @@ func TestActivation(t *testing.T) {
 		gray := utils.GrayscaleImage(img)
 		binRunner := binarization.CreateThresholdBinarization(gray, 128)
 		normalized := NormalizeObject(binRunner.Process())
-		matrix := mat.NewDense(img.Bounds().Dy(), img.Bounds().Dx(), normalized)
+		vec := mat.NewVecDense(len(normalized), normalized)
 
-		images = append(images, matrix)
+		images = append(images, vec)
 	}
-
-	W := GetWeights(images...)
-	activated := Activation(W)
-	ffmt.P(activated)
-}
-
-func TestWithForeignParameters(t *testing.T) {
-	images := make([]*mat.Dense, 0)
-	images = append(images, mat.NewDense(1, 4, []float64{
-		-1, 1, -1, 1,
-	}))
-	images = append(images, mat.NewDense(1, 4, []float64{
-		1, -1, 1, 1,
-	}))
-	images = append(images, mat.NewDense(1, 4, []float64{
-		-1, 1, -1, -1,
-	}))
-
-	noised := mat.NewDense(1, 4, []float64{
-		1, -1, 1, -1,
-	})
-
-	m := SyncHopfield(noised, images)
-	fmt.Println(m)
-}
-
-func TestAsyncHopfield(t *testing.T) {
-	dir, err := ioutil.ReadDir("../../resources/training")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	images := make([]*mat.Dense, 0)
-	for _, _ = range dir {
-		img, err := utils.ReadImagePNG("../../resources/training/train_1.png")
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		gray := utils.GrayscaleImage(img)
-		binRunner := binarization.CreateThresholdBinarization(gray, 128)
-		normalized := NormalizeObject(binRunner.Process())
-		matrix := mat.NewDense(img.Bounds().Dy(), img.Bounds().Dx(), normalized)
-
-		images = append(images, matrix)
-	}
-
-	noised, err := utils.ReadImagePNG("../../resources/shuffle/train_1_10.png")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	gray := utils.GrayscaleImage(noised)
-	binRunner := binarization.CreateThresholdBinarization(gray, 128)
-	normalized := NormalizeObject(binRunner.Process())
-	noiseMatrix := mat.NewDense(noised.Bounds().Dy(), noised.Bounds().Dx(), normalized)
-
-	AsyncHopfield(noiseMatrix, images)
-}
-
-func TestSyncHopfield(t *testing.T) {
-	dir, err := ioutil.ReadDir("../../resources/training")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	images := make([]*mat.Dense, 0)
-	for _, filename := range dir {
-		img, err := utils.ReadImagePNG("../../resources/training/" + filename.Name())
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		gray := utils.GrayscaleImage(img)
-		binRunner := binarization.CreateThresholdBinarization(gray, 128)
-		normalized := NormalizeObject(binRunner.Process())
-		matrix := mat.NewDense(img.Bounds().Dy(), img.Bounds().Dx(), normalized)
-
-		images = append(images, matrix)
-	}
-
-	noised, err := utils.ReadImagePNG("../../resources/shuffle/train_1_10.png")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	gray := utils.GrayscaleImage(noised)
-	binRunner := binarization.CreateThresholdBinarization(gray, 128)
-	normalized := NormalizeObject(binRunner.Process())
-	noiseMatrix := mat.NewDense(noised.Bounds().Dy(), noised.Bounds().Dx(), normalized)
-
-	SyncHopfield(noiseMatrix, images)
 }

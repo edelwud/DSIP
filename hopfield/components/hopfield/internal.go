@@ -1,7 +1,7 @@
 package hopfield
 
 import (
-	mat "github.com/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 	"image"
 	"image/color"
 )
@@ -10,7 +10,8 @@ const (
 	PositiveNormalization = 1.0
 	NegativeNormalization = -1.0
 
-	PositiveAlias = 255
+	PositiveAlias = 0
+	NegativeAlias = 255
 )
 
 func NormalizeObject(img *image.Gray) []float64 {
@@ -31,18 +32,17 @@ func NormalizeObject(img *image.Gray) []float64 {
 	return result
 }
 
-func DenormalizeObject(m *mat.Dense) image.Image {
-	r, c := m.Dims()
-	symbol := image.NewGray(image.Rect(0, 0, c, r))
+func DenormalizeObject(width int, height int, m *mat.VecDense) *image.Gray {
+	symbol := image.NewGray(image.Rect(0, 0, width, height))
 
-	x, y := c, r
+	x, y := width, height
 
 	for i := 0; i < x; i++ {
 		for j := 0; j < y; j++ {
-			value := m.At(j, i)
-			c := uint8(255)
-			if value == -1 {
-				c = 0
+			value := m.AtVec(width*j + i)
+			c := uint8(PositiveAlias)
+			if value == NegativeNormalization {
+				c = NegativeAlias
 			}
 
 			symbol.Set(i, j, color.Gray{
@@ -52,4 +52,10 @@ func DenormalizeObject(m *mat.Dense) image.Image {
 	}
 
 	return symbol
+}
+
+func ConvertToVec(img *image.Gray) *mat.VecDense {
+	normalized := NormalizeObject(img)
+	vec := mat.NewVecDense(len(normalized), normalized)
+	return vec
 }

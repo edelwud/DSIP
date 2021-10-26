@@ -1,8 +1,7 @@
 package hopfield
 
 import (
-	mat "github.com/gonum/matrix/mat64"
-	"math/rand"
+	"gonum.org/v1/gonum/mat"
 )
 
 func SignFunction(value float64) (result float64) {
@@ -14,20 +13,17 @@ func SignFunction(value float64) (result float64) {
 	return
 }
 
-func Activation(m *mat.Dense) *mat.Dense {
-	r, c := m.Dims()
-	result := mat.NewDense(r, c, make([]float64, r*c))
+func Activation(m *mat.VecDense) *mat.VecDense {
+	result := mat.NewVecDense(m.Len(), make([]float64, m.Len()))
 
-	for i := 0; i < r; i++ {
-		for j := 0; j < c; j++ {
-			result.Set(i, j, SignFunction(m.At(i, j)))
-		}
+	for i := 0; i < m.Len(); i++ {
+		result.SetVec(i, SignFunction(m.AtVec(i)))
 	}
 
 	return result
 }
 
-func CompareWithGolden(img *mat.Dense, golden []*mat.Dense) bool {
+func CompareWithGolden(img *mat.VecDense, golden []*mat.VecDense) bool {
 	for _, gold := range golden {
 		if Compare(gold, img) {
 			return true
@@ -36,7 +32,7 @@ func CompareWithGolden(img *mat.Dense, golden []*mat.Dense) bool {
 	return false
 }
 
-func Compare(m1 *mat.Dense, m2 *mat.Dense) bool {
+func Compare(m1 *mat.VecDense, m2 *mat.VecDense) bool {
 	r, c := m1.Dims()
 
 	for i := 0; i < r; i++ {
@@ -48,40 +44,4 @@ func Compare(m1 *mat.Dense, m2 *mat.Dense) bool {
 	}
 
 	return true
-}
-
-func SyncHopfield(img *mat.Dense, golden []*mat.Dense) *mat.Dense {
-	W := GetWeights(golden...)
-
-	for CompareWithGolden(img, golden) != true {
-		img.Mul(img, W)
-		img = Activation(img)
-		break
-	}
-
-	return img
-}
-
-func AsyncHopfield(img *mat.Dense, golden []*mat.Dense) *mat.Dense {
-	W := GetWeights(golden...)
-
-	r, c := img.Dims()
-	m := mat.NewDense(r, c, make([]float64, r*c))
-
-	for CompareWithGolden(img, golden) != true {
-		m.Mul(img, W)
-		m = Activation(m)
-
-		if Compare(img, m) {
-			return img
-		}
-
-		for k := 0; k < 1; k++ {
-			i := rand.Int() % r
-			j := rand.Int() % c
-			img.Set(i, j, m.At(i, j))
-		}
-	}
-
-	return img
 }

@@ -1,7 +1,7 @@
 package hopfield
 
 import (
-	mat "github.com/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 	"gopkg.in/ffmt.v1"
 	"hopfield/components/binarization"
 	"hopfield/components/utils"
@@ -15,7 +15,7 @@ func TestGetWeights(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	images := make([]*mat.Dense, 0)
+	images := make([]*mat.VecDense, 0)
 	for _, filename := range dir {
 		img, err := utils.ReadImagePNG("../../resources/training/" + filename.Name())
 		if err != nil {
@@ -25,9 +25,9 @@ func TestGetWeights(t *testing.T) {
 		gray := utils.GrayscaleImage(img)
 		binRunner := binarization.CreateThresholdBinarization(gray, 128)
 		normalized := NormalizeObject(binRunner.Process())
-		matrix := mat.NewDense(img.Bounds().Dy(), img.Bounds().Dx(), normalized)
+		vec := mat.NewVecDense(len(normalized), normalized)
 
-		images = append(images, matrix)
+		images = append(images, vec)
 	}
 
 	w := GetWeights(images...)

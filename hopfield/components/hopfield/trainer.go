@@ -1,21 +1,20 @@
 package hopfield
 
 import (
-	mat "github.com/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 )
 
-func GetWeights(images ...*mat.Dense) *mat.Dense {
-	r, _ := images[0].T().Dims()
-	_, c := images[1].Dims()
-	result := mat.NewDense(r, c, make([]float64, r*c))
+func GetWeights(images ...*mat.VecDense) *mat.Dense {
+	l := images[0].Len()
+	result := mat.NewDense(l, l, make([]float64, l*l))
 
-	for _, golden := range images {
-		mul := mat.NewDense(r, c, make([]float64, r*c))
-		mul.Mul(golden.T(), golden)
+	for i := range images {
+		mul := mat.NewDense(l, l, make([]float64, l*l))
+		mul.Mul(images[i], images[i].T())
 		result.Add(result, mul)
 	}
 
-	for i := 0; i < r; i++ {
+	for i := 0; i < l; i++ {
 		result.Set(i, i, 0)
 	}
 
