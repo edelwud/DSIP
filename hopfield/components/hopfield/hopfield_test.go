@@ -65,5 +65,10 @@ func TestSyncHopfield(t *testing.T) {
 	gray := utils.GrayscaleImage(noised)
 	binRunner := binarization.CreateThresholdBinarization(gray, 128)
 
-	SyncHopfield(binRunner.Process(), images)
+	result := SyncHopfield(binRunner.Process(), images)
+
+	err = utils.WriteImagePNG(result, "../../resources/results/train_1_10_sync.png")
+	if err != nil {
+		t.Fatal(err)
+	}
 }

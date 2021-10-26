@@ -1,8 +1,8 @@
 package hopfield
 
 import (
+	"fmt"
 	"gonum.org/v1/gonum/mat"
-	"gopkg.in/ffmt.v1"
 	"hopfield/components/binarization"
 	"hopfield/components/utils"
 	"io/ioutil"
@@ -30,6 +30,6 @@ func TestGetWeights(t *testing.T) {
 		images = append(images, vec)
 	}
 
-	w := GetWeights(images...)
-	ffmt.P(w)
+	W := GetWeights(images...)
+	fmt.Println(mat.Formatted(W))
 }
