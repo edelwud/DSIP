@@ -10,7 +10,7 @@ const (
 	LowIntensity  = 48
 )
 
-func ReadTrainingShape(filepath string) (*mat.VecDense, error) {
+func ReadShape(filepath string) (*mat.VecDense, error) {
 	content, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		return nil, err
@@ -27,4 +27,27 @@ func ReadTrainingShape(filepath string) (*mat.VecDense, error) {
 	}
 
 	return mat.NewVecDense(len(vector), vector), nil
+}
+
+func WriteShape(vec *mat.VecDense, filepath string) error {
+	arr := make([]byte, 0)
+	for i := 0; i < vec.Len(); i++ {
+		value := vec.AtVec(i)
+		if value == 1 {
+			arr = append(arr, HighIntensity)
+		}
+		if value == 0 {
+			arr = append(arr, LowIntensity)
+		}
+		if (i+1)%6 == 0 {
+			arr = append(arr, 10)
+		}
+	}
+
+	err := ioutil.WriteFile(filepath, arr, 0777)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

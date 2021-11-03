@@ -7,10 +7,22 @@ import (
 )
 
 func TestReadTrainingShape(t *testing.T) {
-	shape, err := ReadTrainingShape("../../resources/training/1.txt")
+	shape, err := ReadShape("../../resources/training/1.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	fmt.Println(mat.Formatted(shape.T()))
+}
+
+func TestWriteShape(t *testing.T) {
+	shape, err := ReadShape("../../resources/training/1.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = WriteShape(shape, "../../resources/results/1.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
 }
