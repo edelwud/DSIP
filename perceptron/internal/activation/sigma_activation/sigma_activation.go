@@ -34,6 +34,10 @@ func (a SigmaActivation) Derivative(vec *mat.VecDense) *mat.VecDense {
 	return mat.NewVecDense(len(result), result)
 }
 
+func (a SigmaActivation) DerivativeValue(x float64) float64 {
+	return x * (1 - x)
+}
+
 func NewSigmaActivation() activation.Activation {
 	return &SigmaActivation{}
 }
