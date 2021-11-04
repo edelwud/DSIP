@@ -2,25 +2,37 @@ package output_layer
 
 import (
 	"gonum.org/v1/gonum/mat"
+	"math/rand"
 	"perceptron/internal/layers"
 )
 
 type OutputLayer struct {
-	N *mat.VecDense
+	Neurons    *mat.VecDense
+	Thresholds *mat.VecDense
+	Weights    *mat.Dense
 }
 
-const (
-	NeuronNumber = 5
-)
+func (v OutputLayer) GenerateWeights(rows int, columns int) {
+	matrix := make([]float64, rows*columns)
+	for i := range matrix {
+		matrix[i] = rand.Float64()
+	}
 
-func (v OutputLayer) Neurons() *mat.VecDense {
-	return v.N
+	v.Weights = mat.NewDense(rows, columns, matrix)
 }
 
-func (v OutputLayer) CalculateWeights(layer layers.Layer) *mat.Dense {
-	return nil
+func (v OutputLayer) GenerateThreshold() {
+	thresholds := make([]float64, v.Neurons.Len())
+	for i := 0; i < v.Neurons.Len(); i++ {
+		thresholds[i] = rand.Float64()
+	}
+
+	v.Thresholds = mat.NewVecDense(len(thresholds), thresholds)
 }
 
-func NewOutputLayer(vec *mat.VecDense) layers.Layer {
-	return &OutputLayer{N: vec}
+func NewOutputLayer(length int) layers.Layer {
+	vec := make([]float64, length)
+	return &OutputLayer{
+		Neurons: mat.NewVecDense(length, vec),
+	}
 }
