@@ -9,6 +9,10 @@ type OutputLayer struct {
 	N *mat.VecDense
 }
 
+const (
+	NeuronNumber = 5
+)
+
 func (v OutputLayer) Neurons() *mat.VecDense {
 	return v.N
 }
