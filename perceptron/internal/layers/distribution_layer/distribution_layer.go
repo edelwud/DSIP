@@ -30,6 +30,10 @@ func (v DistributionLayer) GenerateThreshold() {
 	v.Thresholds = mat.NewVecDense(len(thresholds), thresholds)
 }
 
+func (v DistributionLayer) Fill(vec *mat.VecDense) {
+	v.Neurons.SetRawVector(vec.RawVector())
+}
+
 func NewDistributionLayer(length int) layers.Layer {
 	vec := make([]float64, length)
 	return &DistributionLayer{

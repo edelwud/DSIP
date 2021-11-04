@@ -3,7 +3,6 @@ package perceptron
 import (
 	"gonum.org/v1/gonum/mat"
 	"perceptron/internal/activation"
-	"perceptron/internal/layers"
 	distributionLayer "perceptron/internal/layers/distribution_layer"
 	hiddenLayer "perceptron/internal/layers/hidden_layer"
 	outputLayer "perceptron/internal/layers/output_layer"
@@ -11,14 +10,10 @@ import (
 )
 
 type Perceptron struct {
-	Activation   activation.Activation
-	Shapes       []*mat.VecDense
-	Layers       []layers.Layer
-	NeuronsValue []float64
-	NeuronsError []float64
-	BiosValue    []float64
-	BiosError    []float64
-	Config       network.Config
+	Activation activation.Activation
+	Shapes     []*mat.VecDense
+	Layers     Layers
+	Config     network.Config
 }
 
 func (p Perceptron) BackPropagation(expect float64) {
@@ -33,7 +28,25 @@ func (p Perceptron) UpdateWeights(lr float64) {
 	return
 }
 
-func NewPerceptron(activation activation.Activation, config network.Config) network.Network {
+func (p Perceptron) Train(shapes ...*mat.VecDense) {
+	shapesTrained := make([]bool, len(shapes))
+trainLoop:
+	for {
+		for i, shape := range shapes {
+			if shapesTrained[i] == true {
+				continue
+			}
+			p.Layers.Distribution.Fill(shape)
+		}
+		for _, value := range shapesTrained {
+			if value == false {
+				continue trainLoop
+			}
+		}
+	}
+}
+
+func NewPerceptron(activation activation.Activation, config *network.Config) network.Network {
 	distribution := distributionLayer.NewDistributionLayer(config.DistributionLength)
 	distribution.GenerateWeights(config.DistributionLength, config.HiddenLength)
 
@@ -46,7 +59,7 @@ func NewPerceptron(activation activation.Activation, config network.Config) netw
 
 	return &Perceptron{
 		Activation: activation,
-		Layers: []layers.Layer{
+		Layers: Layers{
 			distribution,
 			hidden,
 			output,

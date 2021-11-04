@@ -30,6 +30,10 @@ func (v HiddenLayer) GenerateThreshold() {
 	v.Thresholds = mat.NewVecDense(len(thresholds), thresholds)
 }
 
+func (v HiddenLayer) Fill(vec *mat.VecDense) {
+	v.Neurons.SetRawVector(vec.RawVector())
+}
+
 func NewHiddenLayer(length int) layers.Layer {
 	vec := make([]float64, length)
 	return &HiddenLayer{

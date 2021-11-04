@@ -3,6 +3,7 @@ package utils
 import (
 	"gonum.org/v1/gonum/mat"
 	"io/ioutil"
+	"path"
 )
 
 const (
@@ -50,4 +51,25 @@ func WriteShape(vec *mat.VecDense, filepath string) error {
 	}
 
 	return nil
+}
+
+func ReadAllShapes(folder string) ([]*mat.VecDense, error) {
+	dir, err := ioutil.ReadDir(folder)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]*mat.VecDense, 0)
+	for _, shapes := range dir {
+		if shapes.IsDir() {
+			continue
+		}
+		shape, err := ReadShape(path.Join(folder, shapes.Name()))
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, shape)
+	}
+
+	return result, nil
 }

@@ -30,6 +30,10 @@ func (v OutputLayer) GenerateThreshold() {
 	v.Thresholds = mat.NewVecDense(len(thresholds), thresholds)
 }
 
+func (v OutputLayer) Fill(vec *mat.VecDense) {
+	v.Neurons.SetRawVector(vec.RawVector())
+}
+
 func NewOutputLayer(length int) layers.Layer {
 	vec := make([]float64, length)
 	return &OutputLayer{
