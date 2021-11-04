@@ -12,7 +12,7 @@ type OutputLayer struct {
 	Weights    *mat.Dense
 }
 
-func (v OutputLayer) GenerateWeights(rows int, columns int) {
+func (v *OutputLayer) GenerateWeights(rows int, columns int) {
 	matrix := make([]float64, rows*columns)
 	for i := range matrix {
 		matrix[i] = rand.Float64()
@@ -21,7 +21,7 @@ func (v OutputLayer) GenerateWeights(rows int, columns int) {
 	v.Weights = mat.NewDense(rows, columns, matrix)
 }
 
-func (v OutputLayer) GenerateThreshold() {
+func (v *OutputLayer) GenerateThreshold() {
 	thresholds := make([]float64, v.Neurons.Len())
 	for i := 0; i < v.Neurons.Len(); i++ {
 		thresholds[i] = rand.Float64()
@@ -32,6 +32,18 @@ func (v OutputLayer) GenerateThreshold() {
 
 func (v OutputLayer) Fill(vec *mat.VecDense) {
 	v.Neurons.SetRawVector(vec.RawVector())
+}
+
+func (v OutputLayer) W() *mat.Dense {
+	return v.Weights
+}
+
+func (v OutputLayer) N() *mat.VecDense {
+	return v.Neurons
+}
+
+func (v OutputLayer) Threshold() *mat.VecDense {
+	return v.Thresholds
 }
 
 func NewOutputLayer(length int) layers.Layer {

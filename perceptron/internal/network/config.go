@@ -5,6 +5,7 @@ type Config struct {
 	HiddenLength       int
 	OutputLength       int
 	Alpha              float64
+	Epsilon            float64
 }
 
 const (
@@ -12,6 +13,7 @@ const (
 	HiddenLength       = 10
 	OutputLength       = 5
 	Alpha              = 0.5
+	Epsilon            = 0.1
 )
 
 func NewPerceptronDefaultConfig() *Config {
@@ -20,5 +22,6 @@ func NewPerceptronDefaultConfig() *Config {
 		HiddenLength:       HiddenLength,
 		OutputLength:       OutputLength,
 		Alpha:              Alpha,
+		Epsilon:            Epsilon,
 	}
 }

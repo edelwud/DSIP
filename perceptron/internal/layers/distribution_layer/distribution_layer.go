@@ -12,7 +12,7 @@ type DistributionLayer struct {
 	Weights    *mat.Dense
 }
 
-func (v DistributionLayer) GenerateWeights(rows int, columns int) {
+func (v *DistributionLayer) GenerateWeights(rows int, columns int) {
 	matrix := make([]float64, rows*columns)
 	for i := range matrix {
 		matrix[i] = rand.Float64()
@@ -21,7 +21,7 @@ func (v DistributionLayer) GenerateWeights(rows int, columns int) {
 	v.Weights = mat.NewDense(rows, columns, matrix)
 }
 
-func (v DistributionLayer) GenerateThreshold() {
+func (v *DistributionLayer) GenerateThreshold() {
 	thresholds := make([]float64, v.Neurons.Len())
 	for i := 0; i < v.Neurons.Len(); i++ {
 		thresholds[i] = rand.Float64()
@@ -30,8 +30,20 @@ func (v DistributionLayer) GenerateThreshold() {
 	v.Thresholds = mat.NewVecDense(len(thresholds), thresholds)
 }
 
+func (v DistributionLayer) W() *mat.Dense {
+	return v.Weights
+}
+
+func (v DistributionLayer) N() *mat.VecDense {
+	return v.Neurons
+}
+
 func (v DistributionLayer) Fill(vec *mat.VecDense) {
 	v.Neurons.SetRawVector(vec.RawVector())
+}
+
+func (v DistributionLayer) Threshold() *mat.VecDense {
+	return v.Thresholds
 }
 
 func NewDistributionLayer(length int) layers.Layer {

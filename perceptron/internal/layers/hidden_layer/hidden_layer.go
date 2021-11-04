@@ -12,7 +12,7 @@ type HiddenLayer struct {
 	Weights    *mat.Dense
 }
 
-func (v HiddenLayer) GenerateWeights(rows int, columns int) {
+func (v *HiddenLayer) GenerateWeights(rows int, columns int) {
 	matrix := make([]float64, rows*columns)
 	for i := range matrix {
 		matrix[i] = rand.Float64()
@@ -21,7 +21,7 @@ func (v HiddenLayer) GenerateWeights(rows int, columns int) {
 	v.Weights = mat.NewDense(rows, columns, matrix)
 }
 
-func (v HiddenLayer) GenerateThreshold() {
+func (v *HiddenLayer) GenerateThreshold() {
 	thresholds := make([]float64, v.Neurons.Len())
 	for i := 0; i < v.Neurons.Len(); i++ {
 		thresholds[i] = rand.Float64()
@@ -32,6 +32,18 @@ func (v HiddenLayer) GenerateThreshold() {
 
 func (v HiddenLayer) Fill(vec *mat.VecDense) {
 	v.Neurons.SetRawVector(vec.RawVector())
+}
+
+func (v HiddenLayer) W() *mat.Dense {
+	return v.Weights
+}
+
+func (v HiddenLayer) N() *mat.VecDense {
+	return v.Neurons
+}
+
+func (v HiddenLayer) Threshold() *mat.VecDense {
+	return v.Thresholds
 }
 
 func NewHiddenLayer(length int) layers.Layer {

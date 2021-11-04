@@ -23,6 +23,10 @@ func (a SigmaActivation) Apply(vec *mat.VecDense) *mat.VecDense {
 	return mat.NewVecDense(len(result), result)
 }
 
+func (a SigmaActivation) ApplyValue(x float64) float64 {
+	return 1 / (1 + math.Pow(math.E, Alpha*x))
+}
+
 func (a SigmaActivation) Derivative(vec *mat.VecDense) *mat.VecDense {
 	result := make([]float64, 0)
 

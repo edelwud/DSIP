@@ -2,7 +2,9 @@ package perceptron
 
 import (
 	"gonum.org/v1/gonum/mat"
+	"math"
 	"perceptron/internal/activation"
+	"perceptron/internal/layers"
 	distributionLayer "perceptron/internal/layers/distribution_layer"
 	hiddenLayer "perceptron/internal/layers/hidden_layer"
 	outputLayer "perceptron/internal/layers/output_layer"
@@ -11,9 +13,8 @@ import (
 
 type Perceptron struct {
 	Activation activation.Activation
-	Shapes     []*mat.VecDense
 	Layers     Layers
-	Config     network.Config
+	Config     *network.Config
 }
 
 func (p Perceptron) BackPropagation(expect float64) {
@@ -37,6 +38,18 @@ trainLoop:
 				continue
 			}
 			p.Layers.Distribution.Fill(shape)
+
+			p.Layers.CalculateHiddenLayerWeights()
+			p.Layers.CalculateOutputLayerWeights()
+
+			mistake := p.FindMaxMistake(i, p.Layers.Output)
+			if p.Config.Epsilon >= mistake {
+				shapesTrained[i] = true
+				continue
+			}
+
+			p.Layers.RecalculateOutputLayerWeights(p.Config.Alpha, i)
+			p.Layers.RecalculateHiddenLayerWeights(p.Config.Alpha, i)
 		}
 		for _, value := range shapesTrained {
 			if value == false {
@@ -44,6 +57,23 @@ trainLoop:
 			}
 		}
 	}
+}
+
+func (p Perceptron) FindMaxMistake(index int, output layers.Layer) float64 {
+	maxMistake := 0.0
+	for i := 0; i < output.N().Len(); i++ {
+		delta := 0.0
+		if i == index {
+			delta = 1
+		}
+		delta = math.Abs(delta - output.N().AtVec(i))
+
+		if maxMistake < delta {
+			maxMistake = delta
+		}
+	}
+
+	return maxMistake
 }
 
 func NewPerceptron(activation activation.Activation, config *network.Config) network.Network {
@@ -58,8 +88,9 @@ func NewPerceptron(activation activation.Activation, config *network.Config) net
 	output.GenerateThreshold()
 
 	return &Perceptron{
-		Activation: activation,
+		Config: config,
 		Layers: Layers{
+			activation,
 			distribution,
 			hidden,
 			output,
