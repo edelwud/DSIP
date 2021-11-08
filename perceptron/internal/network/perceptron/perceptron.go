@@ -2,7 +2,6 @@ package perceptron
 
 import (
 	"gonum.org/v1/gonum/mat"
-	"math"
 	"perceptron/internal/activation"
 	"perceptron/internal/network"
 )
@@ -27,11 +26,14 @@ func (p Perceptron) BackPropagation(expect int) {
 		}
 	}
 
+	neuronLayers := p.Layers.Neurons
 	errorLayers := p.Layers.Error
+
 	for i := p.Layers.LayersNum - 2; i > 0; i-- {
 		errorLayers[i].MulVec(p.Layers.Weights[i].T(), errorLayers[i+1])
-		for j := 0; j < errorLayers[i].Len(); j++ {
-			errorLayers[i].SetVec(j, p.Activation.DerivativeValue(errorLayers[i].AtVec(j)))
+		for j := 0; j < p.Layers.Sizes[i]; j++ {
+			x := errorLayers[i].AtVec(j) * p.Activation.DerivativeValue(neuronLayers[i].AtVec(j))
+			errorLayers[i].SetVec(j, x)
 		}
 	}
 }
@@ -50,7 +52,7 @@ func (p Perceptron) UpdateWeights(lr float64) {
 	for i := 0; i < p.Layers.LayersNum-1; i++ {
 		for j := 0; j < p.Layers.Sizes[i+1]; j++ {
 			for k := 0; k < p.Layers.Sizes[i]; k++ {
-				x := p.Layers.Neurons[i].AtVec(k) * p.Layers.Error[i+1].AtVec(j) * lr
+				x := p.Layers.Weights[i].At(j, k) + p.Layers.Neurons[i].AtVec(k)*p.Layers.Error[i+1].AtVec(j)*lr
 				p.Layers.Weights[i].Set(j, k, x)
 			}
 		}
@@ -65,37 +67,36 @@ func (p Perceptron) UpdateWeights(lr float64) {
 }
 
 func (p Perceptron) Training(shapes []*mat.VecDense) {
-	ra := 0.0
-	maxRa := -math.MaxFloat64
-	epoch := 0.0
-	iterations := 20000.0
-	outputLayer := p.Layers.Neurons[p.Layers.LayersNum-1]
+	ra := 0
+	trained := false
 
-	for ra/float64(len(shapes)) < 1 {
+	for !trained {
+		trained = true
 		ra = 0
+
 		for i, shape := range shapes {
 			p.LoadShape(shape)
 			predict := p.ForwardFeed()
 
 			if predict != i {
 				p.BackPropagation(i)
-				p.UpdateWeights(0.15 * math.Exp(-epoch/iterations))
-			}
-
-			if (predict+1)%outputLayer.Len() == i {
+				p.UpdateWeights(p.Config.Alpha)
+			} else {
 				ra++
 			}
-		}
 
-		if ra > maxRa {
-			maxRa = ra
-		}
-
-		epoch++
-		if epoch == iterations {
-			break
+			if ra != len(shapes) {
+				trained = false
+			} else {
+				trained = true
+			}
 		}
 	}
+}
+
+func (p Perceptron) Recognize(shape *mat.VecDense) int {
+	p.LoadShape(shape)
+	return p.ForwardFeed()
 }
 
 func (p Perceptron) LoadShape(shape *mat.VecDense) {

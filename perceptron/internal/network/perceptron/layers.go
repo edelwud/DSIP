@@ -34,7 +34,12 @@ func (l *Layers) InitWeights() {
 	for i := range weights {
 		w := make([]float64, l.Sizes[i+1]*l.Sizes[i])
 		for j := range w {
-			w[j] = rand.Float64()
+			sign := rand.Float64()
+			if sign > 0.5 {
+				w[j] = rand.Float64()
+			} else {
+				w[j] = -rand.Float64()
+			}
 		}
 		weights[i] = mat.NewDense(l.Sizes[i+1], l.Sizes[i], w)
 	}
@@ -48,7 +53,12 @@ func (l *Layers) InitBios() {
 	for i := range bios {
 		b := make([]float64, l.Sizes[i+1])
 		for j := range b {
-			b[j] = rand.Float64()
+			sign := rand.Float64()
+			if sign > 0.5 {
+				b[j] = rand.Float64()
+			} else {
+				b[j] = -rand.Float64()
+			}
 		}
 		bios[i] = mat.NewVecDense(l.Sizes[i+1], b)
 	}
