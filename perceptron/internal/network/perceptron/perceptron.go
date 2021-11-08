@@ -68,10 +68,8 @@ func (p Perceptron) UpdateWeights(lr float64) {
 
 func (p Perceptron) Training(shapes []*mat.VecDense) {
 	ra := 0
-	trained := false
 
-	for !trained {
-		trained = true
+	for ra != len(shapes) {
 		ra = 0
 
 		for i, shape := range shapes {
@@ -83,12 +81,6 @@ func (p Perceptron) Training(shapes []*mat.VecDense) {
 				p.UpdateWeights(p.Config.Alpha)
 			} else {
 				ra++
-			}
-
-			if ra != len(shapes) {
-				trained = false
-			} else {
-				trained = true
 			}
 		}
 	}
@@ -108,8 +100,10 @@ func NewPerceptron(activation activation.Activation, config *network.Config) net
 		Activation: activation,
 		Config:     config,
 		Layers: NewLayers(
-			3,
+			5,
 			config.DistributionLength,
+			24,
+			16,
 			config.HiddenLength,
 			config.OutputLength,
 		),
