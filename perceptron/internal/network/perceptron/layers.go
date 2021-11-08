@@ -46,7 +46,7 @@ func (l Layers) RecalculateOutputLayerWeights(alpha float64, valid int) {
 				exposed = 1
 			}
 
-			newWeight := currentWeight + alpha*outputState*(1-outputState)*(exposed-outputState)*hiddenState
+			newWeight := currentWeight + alpha*outputState*(1-outputState)*(outputState-exposed)*hiddenState
 			hiddenOutputWeights.Set(i, j, newWeight)
 		}
 	}
