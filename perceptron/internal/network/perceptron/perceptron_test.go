@@ -17,5 +17,5 @@ func TestPerceptron_Train(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	perceptron.Train(shapes...)
+	perceptron.Training(shapes)
 }

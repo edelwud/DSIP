@@ -2,99 +2,123 @@ package perceptron
 
 import (
 	"gonum.org/v1/gonum/mat"
-	"perceptron/internal/activation"
-	"perceptron/internal/layers"
+	"math"
+	"math/rand"
 )
 
 type Layers struct {
-	Activation   activation.Activation
-	Distribution layers.Layer
-	Hidden       layers.Layer
-	Output       layers.Layer
+	LayersNum int
+	Sizes     []int
+
+	Neurons []*mat.VecDense
+	Error   []*mat.VecDense
+	Weights []*mat.Dense
+	Bios    []*mat.VecDense
+	BiosVal *mat.VecDense
 }
 
-func (l Layers) CalculateHiddenLayerWeights() {
-	l.CalculateLayerWeights(l.Hidden.N(), l.Hidden.Threshold(), l.Distribution.N(), l.Distribution.W())
-}
+func (l *Layers) InitLayers() {
+	neurons := make([]*mat.VecDense, l.LayersNum)
 
-func (l Layers) CalculateOutputLayerWeights() {
-	l.CalculateLayerWeights(l.Output.N(), l.Output.Threshold(), l.Hidden.N(), l.Hidden.W())
-}
-
-func (l Layers) CalculateLayerWeights(first *mat.VecDense, threshold *mat.VecDense, second *mat.VecDense, weights *mat.Dense) {
-	for i := 0; i < first.Len(); i++ {
-		sum := 0.0
-		for j := 0; j < second.Len(); j++ {
-			sum += second.AtVec(j) * weights.At(j, i)
-		}
-		activated := l.Activation.ApplyValue(sum + threshold.AtVec(i))
-		first.SetVec(i, activated)
-	}
-}
-
-func (l Layers) RecalculateOutputLayerWeights(alpha float64, valid int) {
-	hiddenOutputWeights := l.Hidden.W()
-	r, c := hiddenOutputWeights.Dims()
-	for i := 0; i < r; i++ {
-		for j := 0; j < c; j++ {
-			outputState := l.Output.N().AtVec(j)
-			hiddenState := l.Hidden.N().AtVec(i)
-			currentWeight := hiddenOutputWeights.At(i, j)
-
-			exposed := 0.0
-			if j == valid {
-				exposed = 1
-			}
-
-			newWeight := currentWeight + alpha*outputState*(1-outputState)*(outputState-exposed)*hiddenState
-			hiddenOutputWeights.Set(i, j, newWeight)
-		}
+	for i := range neurons {
+		n := make([]float64, l.Sizes[i])
+		neurons[i] = mat.NewVecDense(l.Sizes[i], n)
 	}
 
-	for i := 0; i < l.Output.N().Len(); i++ {
-		outputState := l.Output.N().AtVec(i)
-		outputThreshold := l.Output.Threshold()
-		currentThreshold := outputThreshold.AtVec(i)
-
-		exposed := 0.0
-		if i == valid {
-			exposed = 1
-		}
-
-		outputThreshold.SetVec(i, currentThreshold+alpha*outputState*(1-outputState)*(exposed-outputState))
-	}
+	l.Neurons = neurons
 }
 
-func (l Layers) RecalculateHiddenLayerWeights(alpha float64, valid int) {
-	distributionHiddenWeights := l.Distribution.W()
-	hiddenOutputWeights := l.Hidden.W()
-	r, c := distributionHiddenWeights.Dims()
-	for i := 0; i < r; i++ {
-		for j := 0; j < c; j++ {
-			mistake := 0.0
-			outputLayer := l.Output.N()
-			for k := 0; k < outputLayer.Len(); k++ {
-				outputState := outputLayer.AtVec(k)
+func (l *Layers) InitWeights() {
+	weights := make([]*mat.Dense, l.LayersNum-1)
 
-				exposed := 0.0
-				if i == valid {
-					exposed = 1
-				}
+	for i := range weights {
+		w := make([]float64, l.Sizes[i+1]*l.Sizes[i])
+		for j := range w {
+			w[j] = rand.Float64()
+		}
+		weights[i] = mat.NewDense(l.Sizes[i+1], l.Sizes[i], w)
+	}
 
-				mistake += (exposed - outputState) * outputState * (1 - outputState) * hiddenOutputWeights.At(j, k)
-			}
+	l.Weights = weights
+}
 
-			distributionLayer := l.Distribution.N()
-			hideLayer := l.Hidden.N()
-			temp := alpha * hideLayer.AtVec(j) * (1 - hideLayer.AtVec(j)) * mistake
-			currentWeight := distributionHiddenWeights.At(i, j)
-			distributionHiddenWeights.Set(i, j, currentWeight+temp*distributionLayer.AtVec(i))
+func (l *Layers) InitBios() {
+	bios := make([]*mat.VecDense, l.LayersNum-1)
 
-			if i == 0 {
-				hiddenThreshold := l.Hidden.Threshold()
-				currentThreshold := hiddenThreshold.AtVec(j)
-				hiddenThreshold.SetVec(j, currentThreshold+temp)
-			}
+	for i := range bios {
+		b := make([]float64, l.Sizes[i+1])
+		for j := range b {
+			b[j] = rand.Float64()
+		}
+		bios[i] = mat.NewVecDense(l.Sizes[i+1], b)
+	}
+
+	bV := make([]float64, l.LayersNum-1)
+	for i := range bV {
+		bV[i] = 1
+	}
+	biosVal := mat.NewVecDense(l.LayersNum-1, bV)
+
+	l.Bios = bios
+	l.BiosVal = biosVal
+}
+
+func (l *Layers) InitErrors() {
+	errors := make([]*mat.VecDense, l.LayersNum)
+
+	for i := range errors {
+		e := make([]float64, l.Sizes[i])
+		errors[i] = mat.NewVecDense(len(e), e)
+	}
+
+	l.Error = errors
+}
+
+func (l Layers) FindResult() int {
+	max := -math.MaxFloat64
+	result := -1
+	outputLayer := l.Neurons[l.LayersNum-1]
+
+	for i := 0; i < outputLayer.Len(); i++ {
+		x := outputLayer.AtVec(i)
+		if x > max {
+			max = x
+			result = i
 		}
 	}
+
+	return result
+}
+
+func (l Layers) FindMaxError(expect int) float64 {
+	maxError := -math.MaxFloat64
+	outputLayer := l.Neurons[l.LayersNum-1]
+
+	for i := 0; i < outputLayer.Len(); i++ {
+		currentError := 0.0
+		if i == expect {
+			currentError = 1 - outputLayer.AtVec(i)
+		} else {
+			currentError = outputLayer.AtVec(i)
+		}
+		if currentError > maxError {
+			maxError = currentError
+		}
+	}
+
+	return maxError
+}
+
+func NewLayers(layersNum int, sizes ...int) *Layers {
+	layers := &Layers{
+		LayersNum: layersNum,
+		Sizes:     sizes,
+	}
+
+	layers.InitWeights()
+	layers.InitBios()
+	layers.InitLayers()
+	layers.InitErrors()
+
+	return layers
 }
