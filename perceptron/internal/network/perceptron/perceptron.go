@@ -66,21 +66,34 @@ func (p Perceptron) UpdateWeights(lr float64) {
 	}
 }
 
-func (p Perceptron) Training(shapes []*mat.VecDense) {
-	ra := 0
+func (p Perceptron) OutputNeurons() *mat.VecDense {
+	return p.Layers.Neurons[p.Layers.LayersNum-1]
+}
 
-	for ra != len(shapes) {
-		ra = 0
+func (p Perceptron) Training(shapes []*mat.VecDense) {
+	trainedShapes := make([]bool, len(shapes))
+	trained := false
+	maxError := 0.20
+
+	for !trained {
+		trained = true
 
 		for i, shape := range shapes {
 			p.LoadShape(shape)
-			predict := p.ForwardFeed()
+			p.ForwardFeed()
+			currentError := p.Layers.FindMaxError(i)
 
-			if predict != i {
+			if currentError > maxError {
 				p.BackPropagation(i)
 				p.UpdateWeights(p.Config.Alpha)
 			} else {
-				ra++
+				trainedShapes[i] = true
+			}
+		}
+
+		for i := range trainedShapes {
+			if trainedShapes[i] == false {
+				trained = false
 			}
 		}
 	}
@@ -100,10 +113,8 @@ func NewPerceptron(activation activation.Activation, config *network.Config) net
 		Activation: activation,
 		Config:     config,
 		Layers: NewLayers(
-			5,
+			3,
 			config.DistributionLength,
-			24,
-			16,
 			config.HiddenLength,
 			config.OutputLength,
 		),

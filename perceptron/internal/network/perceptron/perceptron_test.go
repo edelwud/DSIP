@@ -2,6 +2,7 @@ package perceptron
 
 import (
 	"fmt"
+	"gonum.org/v1/gonum/mat"
 	"io/ioutil"
 	sigma "perceptron/internal/activation/sigma_activation"
 	"perceptron/internal/network"
@@ -35,6 +36,7 @@ func TestPerceptron_Train(t *testing.T) {
 			t.Fatal(err)
 		}
 		index := perceptron.Recognize(shape)
-		fmt.Printf("File: %s, Class: %d\n", file.Name(), index+1)
+		fmt.Printf("File: %s, Class: %d, ", file.Name(), index+1)
+		fmt.Println(mat.Formatted(perceptron.OutputNeurons().T()))
 	}
 }
