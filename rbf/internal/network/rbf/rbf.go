@@ -10,60 +10,52 @@ type RBF struct {
 	Activation activation.Activation
 	Layers     *Layers
 	Config     *network.Config
+	Centers    int
 }
 
 func (p RBF) BackPropagation(expect int) {
-	outputLayer := p.Layers.Neurons[p.Layers.LayersNum-1]
-	outputErrorLayer := p.Layers.Error[p.Layers.LayersNum-1]
+	e := make([]float64, p.Config.OutputLength)
+	e[expect] = 1
+	errorVec := mat.NewVecDense(len(e), e)
+	errorVec.SubVec(p.Layers.Neurons[1], errorVec)
 
-	for i := 0; i < outputLayer.Len(); i++ {
-		if i != expect {
-			x := -outputLayer.AtVec(i) * p.Activation.DerivativeValue(outputLayer.AtVec(i))
-			outputErrorLayer.SetVec(i, x)
-		} else {
-			x := (1.0 - outputLayer.AtVec(i)) * p.Activation.DerivativeValue(outputLayer.AtVec(i))
-			outputErrorLayer.SetVec(i, x)
-		}
-	}
+	deltaVec := mat.NewVecDense(
+		p.Layers.Sizes[1],
+		make([]float64, p.Layers.Sizes[1]),
+	)
+	deltaVec.MulElemVec(p.Activation.Derivative(p.Layers.Neurons[1]), errorVec)
 
-	neuronLayers := p.Layers.Neurons
-	errorLayers := p.Layers.Error
+	deltaChange := mat.NewDense(
+		p.Layers.Sizes[1],
+		p.Layers.Sizes[0],
+		make([]float64, p.Layers.Sizes[1]*p.Layers.Sizes[0]),
+	)
 
-	for i := p.Layers.LayersNum - 2; i > 0; i-- {
-		errorLayers[i].MulVec(p.Layers.Weights[i].T(), errorLayers[i+1])
-		for j := 0; j < p.Layers.Sizes[i]; j++ {
-			x := errorLayers[i].AtVec(j) * p.Activation.DerivativeValue(neuronLayers[i].AtVec(j))
-			errorLayers[i].SetVec(j, x)
-		}
-	}
+	deltaChange.Mul(deltaVec, p.Layers.Neurons[0].T())
+	deltaChange.Apply(func(_, _ int, v float64) float64 {
+		return v * p.Config.DeltaRate
+	}, deltaChange)
+
+	lastDeltaChange := mat.NewDense(
+		p.Layers.Sizes[1],
+		p.Layers.Sizes[0],
+		make([]float64, p.Layers.Sizes[1]*p.Layers.Sizes[0]),
+	)
+	lastDeltaChange.Copy(p.Layers.LastChange)
+	lastDeltaChange.Apply(func(_, _ int, v float64) float64 {
+		return v * p.Config.LastChangeRate
+	}, lastDeltaChange)
+
+	deltaChange.Add(deltaChange, lastDeltaChange)
+	p.Layers.Weights.Sub(p.Layers.Weights, deltaChange)
+	p.Layers.LastChange.Copy(lastDeltaChange)
 }
 
 func (p *RBF) ForwardFeed() int {
-	for i := 1; i < p.Layers.LayersNum; i++ {
-		p.Layers.Neurons[i].MulVec(p.Layers.Weights[i-1], p.Layers.Neurons[i-1])
-		p.Layers.Neurons[i].AddVec(p.Layers.Neurons[i], p.Layers.Bios[i-1])
-		p.Layers.Neurons[i].CopyVec(p.Activation.Apply(p.Layers.Neurons[i]))
-	}
-
+	p.Layers.Neurons[1].MulVec(p.Layers.Weights, p.Layers.Neurons[0])
+	p.Layers.Neurons[1].AddVec(p.Layers.Neurons[1], p.Layers.Bias)
+	p.Layers.Neurons[1].CopyVec(p.Activation.Apply(p.Layers.Neurons[1]))
 	return p.Layers.FindResult()
-}
-
-func (p RBF) UpdateWeights(lr float64) {
-	for i := 0; i < p.Layers.LayersNum-1; i++ {
-		for j := 0; j < p.Layers.Sizes[i+1]; j++ {
-			for k := 0; k < p.Layers.Sizes[i]; k++ {
-				x := p.Layers.Weights[i].At(j, k) + p.Layers.Neurons[i].AtVec(k)*p.Layers.Error[i+1].AtVec(j)*lr
-				p.Layers.Weights[i].Set(j, k, x)
-			}
-		}
-	}
-
-	for i := 0; i < p.Layers.LayersNum-1; i++ {
-		for k := 0; k < p.Layers.Sizes[i+1]; k++ {
-			x := p.Layers.Bios[i].AtVec(k) + p.Layers.Error[i+1].AtVec(k)*lr
-			p.Layers.Bios[i].SetVec(k, x)
-		}
-	}
 }
 
 func (p RBF) OutputNeurons() *mat.VecDense {
@@ -71,6 +63,7 @@ func (p RBF) OutputNeurons() *mat.VecDense {
 }
 
 func (p RBF) Training(shapes []*mat.VecDense) {
+
 	trainedShapes := make([]bool, len(shapes))
 	trained := false
 	maxError := 0.01
@@ -85,7 +78,6 @@ func (p RBF) Training(shapes []*mat.VecDense) {
 
 			if currentError > maxError {
 				p.BackPropagation(i)
-				p.UpdateWeights(p.Config.Alpha)
 				trainedShapes[i] = false
 			} else {
 				trainedShapes[i] = true
@@ -113,10 +105,9 @@ func NewRBF(activation activation.Activation, config *network.Config) network.Ne
 	return &RBF{
 		Activation: activation,
 		Config:     config,
+		Centers:    config.Centers,
 		Layers: NewLayers(
-			3,
 			config.DistributionLength,
-			config.HiddenLength,
 			config.OutputLength,
 		),
 	}

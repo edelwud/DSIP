@@ -10,12 +10,15 @@ type Layers struct {
 	LayersNum int
 	Sizes     []int
 
-	Neurons []*mat.VecDense
-	Error   []*mat.VecDense
-	Weights []*mat.Dense
-	Bios    []*mat.VecDense
-	BiosVal *mat.VecDense
+	Neurons    []*mat.VecDense
+	LastChange *mat.Dense
+	Weights    *mat.Dense
+	Bias       *mat.VecDense
 }
+
+const (
+	LayersNum = 2
+)
 
 func (l *Layers) InitLayers() {
 	neurons := make([]*mat.VecDense, l.LayersNum)
@@ -29,59 +32,35 @@ func (l *Layers) InitLayers() {
 }
 
 func (l *Layers) InitWeights() {
-	weights := make([]*mat.Dense, l.LayersNum-1)
-
-	for i := range weights {
-		w := make([]float64, l.Sizes[i+1]*l.Sizes[i])
-		for j := range w {
-			sign := rand.Float64()
-			if sign > 0.5 {
-				w[j] = rand.Float64()
-			} else {
-				w[j] = -rand.Float64()
-			}
+	w := make([]float64, l.Sizes[1]*l.Sizes[0])
+	for j := range w {
+		sign := rand.Float64()
+		if sign > 0.5 {
+			w[j] = rand.Float64()
+		} else {
+			w[j] = -rand.Float64()
 		}
-		weights[i] = mat.NewDense(l.Sizes[i+1], l.Sizes[i], w)
 	}
-
-	l.Weights = weights
+	l.Weights = mat.NewDense(l.Sizes[1], l.Sizes[0], w)
 }
 
-func (l *Layers) InitBios() {
-	bios := make([]*mat.VecDense, l.LayersNum-1)
-
-	for i := range bios {
-		b := make([]float64, l.Sizes[i+1])
-		for j := range b {
-			sign := rand.Float64()
-			if sign > 0.5 {
-				b[j] = rand.Float64()
-			} else {
-				b[j] = -rand.Float64()
-			}
+func (l *Layers) InitBias() {
+	b := make([]float64, l.Sizes[1])
+	for j := range b {
+		sign := rand.Float64()
+		if sign > 0.5 {
+			b[j] = rand.Float64()
+		} else {
+			b[j] = -rand.Float64()
 		}
-		bios[i] = mat.NewVecDense(l.Sizes[i+1], b)
 	}
 
-	bV := make([]float64, l.LayersNum-1)
-	for i := range bV {
-		bV[i] = 1
-	}
-	biosVal := mat.NewVecDense(l.LayersNum-1, bV)
-
-	l.Bios = bios
-	l.BiosVal = biosVal
+	l.Bias = mat.NewVecDense(l.Sizes[1], b)
 }
 
-func (l *Layers) InitErrors() {
-	errors := make([]*mat.VecDense, l.LayersNum)
-
-	for i := range errors {
-		e := make([]float64, l.Sizes[i])
-		errors[i] = mat.NewVecDense(len(e), e)
-	}
-
-	l.Error = errors
+func (l *Layers) InitLastChange() {
+	e := make([]float64, l.Sizes[1]*l.Sizes[0])
+	l.LastChange = mat.NewDense(l.Sizes[1], l.Sizes[0], e)
 }
 
 func (l Layers) FindResult() int {
@@ -119,16 +98,16 @@ func (l Layers) FindMaxError(expect int) float64 {
 	return maxError
 }
 
-func NewLayers(layersNum int, sizes ...int) *Layers {
+func NewLayers(sizes ...int) *Layers {
 	layers := &Layers{
-		LayersNum: layersNum,
+		LayersNum: LayersNum,
 		Sizes:     sizes,
 	}
 
 	layers.InitWeights()
-	layers.InitBios()
+	layers.InitBias()
 	layers.InitLayers()
-	layers.InitErrors()
+	layers.InitLastChange()
 
 	return layers
 }

@@ -2,29 +2,26 @@ package network
 
 type Config struct {
 	DistributionLength int
-	HiddenLength       int
 	OutputLength       int
-	Alpha              float64
-	Epsilon            float64
-	WeightsStored      string
+	Centers            int
+	DeltaRate          float64
+	LastChangeRate     float64
 }
 
 const (
 	DistributionLength = 36
-	HiddenLength       = 10
 	OutputLength       = 5
-	Alpha              = 0.05
-	Epsilon            = 0.1
-	WeightsStored      = "../../../resources/data/weights.data"
+	Centers            = 4
+	DeltaRate          = 0.1
+	LastChangeRate     = 0.05
 )
 
 func NewRBFDefaultConfig() *Config {
 	return &Config{
 		DistributionLength: DistributionLength,
-		HiddenLength:       HiddenLength,
 		OutputLength:       OutputLength,
-		Alpha:              Alpha,
-		Epsilon:            Epsilon,
-		WeightsStored:      WeightsStored,
+		Centers:            Centers,
+		DeltaRate:          DeltaRate,
+		LastChangeRate:     LastChangeRate,
 	}
 }
