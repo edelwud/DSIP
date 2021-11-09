@@ -13,8 +13,8 @@ type Layers struct {
 	Neurons []*mat.VecDense
 	Error   []*mat.VecDense
 	Weights []*mat.Dense
-	Bios    []*mat.VecDense
-	BiosVal *mat.VecDense
+	Bias    []*mat.VecDense
+	BiasVal *mat.VecDense
 }
 
 func (l *Layers) InitLayers() {
@@ -47,10 +47,10 @@ func (l *Layers) InitWeights() {
 	l.Weights = weights
 }
 
-func (l *Layers) InitBios() {
-	bios := make([]*mat.VecDense, l.LayersNum-1)
+func (l *Layers) InitBias() {
+	bias := make([]*mat.VecDense, l.LayersNum-1)
 
-	for i := range bios {
+	for i := range bias {
 		b := make([]float64, l.Sizes[i+1])
 		for j := range b {
 			sign := rand.Float64()
@@ -60,17 +60,17 @@ func (l *Layers) InitBios() {
 				b[j] = -rand.Float64()
 			}
 		}
-		bios[i] = mat.NewVecDense(l.Sizes[i+1], b)
+		bias[i] = mat.NewVecDense(l.Sizes[i+1], b)
 	}
 
 	bV := make([]float64, l.LayersNum-1)
 	for i := range bV {
 		bV[i] = 1
 	}
-	biosVal := mat.NewVecDense(l.LayersNum-1, bV)
+	biasVal := mat.NewVecDense(l.LayersNum-1, bV)
 
-	l.Bios = bios
-	l.BiosVal = biosVal
+	l.Bias = bias
+	l.BiasVal = biasVal
 }
 
 func (l *Layers) InitErrors() {
@@ -126,7 +126,7 @@ func NewLayers(layersNum int, sizes ...int) *Layers {
 	}
 
 	layers.InitWeights()
-	layers.InitBios()
+	layers.InitBias()
 	layers.InitLayers()
 	layers.InitErrors()
 

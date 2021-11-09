@@ -41,7 +41,7 @@ func (p Perceptron) BackPropagation(expect int) {
 func (p *Perceptron) ForwardFeed() int {
 	for i := 1; i < p.Layers.LayersNum; i++ {
 		p.Layers.Neurons[i].MulVec(p.Layers.Weights[i-1], p.Layers.Neurons[i-1])
-		p.Layers.Neurons[i].AddVec(p.Layers.Neurons[i], p.Layers.Bios[i-1])
+		p.Layers.Neurons[i].AddVec(p.Layers.Neurons[i], p.Layers.Bias[i-1])
 		p.Layers.Neurons[i].CopyVec(p.Activation.Apply(p.Layers.Neurons[i]))
 	}
 
@@ -60,8 +60,8 @@ func (p Perceptron) UpdateWeights(lr float64) {
 
 	for i := 0; i < p.Layers.LayersNum-1; i++ {
 		for k := 0; k < p.Layers.Sizes[i+1]; k++ {
-			x := p.Layers.Bios[i].AtVec(k) + p.Layers.Error[i+1].AtVec(k)*lr
-			p.Layers.Bios[i].SetVec(k, x)
+			x := p.Layers.Bias[i].AtVec(k) + p.Layers.Error[i+1].AtVec(k)*lr
+			p.Layers.Bias[i].SetVec(k, x)
 		}
 	}
 }
