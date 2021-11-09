@@ -11,9 +11,9 @@ type Config struct {
 const (
 	DistributionLength = 36
 	OutputLength       = 5
-	Centers            = 4
-	DeltaRate          = 0.1
-	LastChangeRate     = 0.05
+	Centers            = 5
+	DeltaRate          = 0.001
+	LastChangeRate     = 0.0005
 )
 
 func NewRBFDefaultConfig() *Config {
