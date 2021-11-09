@@ -32,24 +32,14 @@ func (a SigmaActivation) Derivative(vec *mat.VecDense) *mat.VecDense {
 
 	for i := 0; i < vec.Len(); i++ {
 		x := vec.AtVec(i)
-		if x < 0 {
-			x *= 0.01
-		} else if x > 1 {
-			x = 1 + 0.01*(x-1)
-		}
-		result = append(result, x)
+		result = append(result, x*(1-x))
 	}
 
 	return mat.NewVecDense(len(result), result)
 }
 
 func (a SigmaActivation) DerivativeValue(x float64) float64 {
-	if x < 0 {
-		x *= 0.01
-	} else {
-		x = 1 + 0.01*(x-1)
-	}
-	return x
+	return x * (1 - x)
 }
 
 func NewSigmaActivation() activation.Activation {

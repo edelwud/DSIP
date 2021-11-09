@@ -73,7 +73,7 @@ func (p Perceptron) OutputNeurons() *mat.VecDense {
 func (p Perceptron) Training(shapes []*mat.VecDense) {
 	trainedShapes := make([]bool, len(shapes))
 	trained := false
-	maxError := 0.20
+	maxError := 0.01
 
 	for !trained {
 		trained = true
@@ -86,6 +86,7 @@ func (p Perceptron) Training(shapes []*mat.VecDense) {
 			if currentError > maxError {
 				p.BackPropagation(i)
 				p.UpdateWeights(p.Config.Alpha)
+				trainedShapes[i] = false
 			} else {
 				trainedShapes[i] = true
 			}
