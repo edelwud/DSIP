@@ -2,11 +2,9 @@ package rbf
 
 import (
 	"gonum.org/v1/gonum/mat"
-	"math"
-	"math/rand"
 	"rbf/internal/activation"
 	"rbf/internal/network"
-	"time"
+	"rbf/pkg/clusterization/kmeans"
 )
 
 type RBF struct {
@@ -15,6 +13,11 @@ type RBF struct {
 	Config     *network.Config
 	Centers    []*mat.VecDense
 }
+
+const (
+	Width  = 6
+	Height = 6
+)
 
 func (p RBF) BackPropagation(expect int) {
 	e := make([]float64, p.Config.OutputLength)
@@ -55,57 +58,35 @@ func (p RBF) BackPropagation(expect int) {
 }
 
 func (p RBF) Prepare(shapes []*mat.VecDense) []*mat.VecDense {
-	rbfShapes := make([]*mat.VecDense, len(shapes))
+	result := make([]*mat.VecDense, len(shapes))
 	for i, shape := range shapes {
-		result := p.Gaussian(shape)
-		rbfShapes[i] = mat.NewVecDense(result.Len(), make([]float64, result.Len()))
-		rbfShapes[i].CopyVec(result)
-	}
-
-	return rbfShapes
-}
-
-func (p *RBF) CalculateCenters(shapes []*mat.VecDense) {
-	p.Centers = make([]*mat.VecDense, p.Config.Centers)
-	for i := range p.Centers {
-		idx := genRandomIdx(len(shapes))
-		p.Centers[i] = mat.NewVecDense(shapes[idx[i]].Len(), make([]float64, shapes[idx[i]].Len()))
-		p.Centers[i].CopyVec(shapes[idx[i]])
-	}
-}
-
-func (p RBF) Gaussian(shape *mat.VecDense) *mat.VecDense {
-	result := mat.NewVecDense(p.Config.Centers, make([]float64, p.Config.Centers))
-	div := 0.0
-	for j := 0; j < p.Config.Centers; j++ {
-		sum := 0.0
-		for i := 0; i < p.Config.DistributionLength; i++ {
-			delta := shape.AtVec(i) - p.Centers[j].AtVec(i)
-			sum += delta * delta
-		}
-		result.SetVec(j, math.Exp(-8*sum))
-		div += result.AtVec(j)
-	}
-
-	for i := 0; i < result.Len(); i++ {
-		x := result.AtVec(i)
-		result.SetVec(i, x/div)
+		result[i] = p.PrepareShape(shape)
 	}
 
 	return result
 }
 
-func genRandomIdx(N int) []int {
-	A := make([]int, N)
-	for i := 0; i < N; i++ {
-		A[i] = i
-	}
+func (p RBF) PrepareShape(shape *mat.VecDense) *mat.VecDense {
+	rbfShape := mat.NewDense(Height, Width, shape.RawVector().Data)
+	var d []kmeans.Point
 
-	for i := 0; i < N; i++ {
-		j := i + int(rand.Float64()*float64(N-i))
-		A[i], A[j] = A[j], A[i]
+	rbfShape.Apply(func(i, j int, v float64) float64 {
+		if v == 1 {
+			d = append(d, kmeans.Point{
+				Entry: []float64{float64(i), float64(j)},
+			})
+		}
+		return v
+	}, rbfShape)
+
+	centroids := kmeans.KMeans(d, uint64(p.Config.Centers), 0.1)
+
+	buffer := make([]float64, 0)
+	for _, c := range centroids {
+		buffer = append(buffer, c.Center.Entry[0])
+		buffer = append(buffer, c.Center.Entry[1])
 	}
-	return A
+	return mat.NewVecDense(len(buffer), buffer)
 }
 
 func (p *RBF) ForwardFeed() int {
@@ -120,23 +101,36 @@ func (p RBF) OutputNeurons() *mat.VecDense {
 }
 
 func (p *RBF) Training(shapes []*mat.VecDense) {
-	p.CalculateCenters(shapes)
 	rbfShapes := p.Prepare(shapes)
-	maxIterations := 10000
-	i := 0
 
-	for i < maxIterations {
+	maxError := 0.1
+	trained := false
+	trainedShapes := make([]bool, len(rbfShapes))
+
+	for !trained {
+		trained = true
 		for i, shape := range rbfShapes {
 			p.LoadShape(shape)
 			p.ForwardFeed()
-			p.BackPropagation(i)
+			currentError := p.Layers.FindMaxError(i)
+			if currentError > maxError {
+				p.BackPropagation(i)
+				trainedShapes[i] = false
+			} else {
+				trainedShapes[i] = true
+			}
 		}
-		i++
+
+		for i := range trainedShapes {
+			if trainedShapes[i] == false {
+				trained = false
+			}
+		}
 	}
 }
 
 func (p RBF) Recognize(shape *mat.VecDense) int {
-	result := p.Gaussian(shape)
+	result := p.PrepareShape(shape)
 	p.LoadShape(result)
 	return p.ForwardFeed()
 }
@@ -146,12 +140,11 @@ func (p RBF) LoadShape(shape *mat.VecDense) {
 }
 
 func NewRBF(activation activation.Activation, config *network.Config) network.Network {
-	rand.Seed(time.Now().UnixNano())
 	return &RBF{
 		Activation: activation,
 		Config:     config,
 		Layers: NewLayers(
-			config.Centers,
+			config.Centers*2,
 			config.OutputLength,
 		),
 	}
